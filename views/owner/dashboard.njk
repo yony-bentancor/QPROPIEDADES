@@ -1,0 +1,410 @@
+{% extends 'layouts/owner.njk' %}
+{% block content %}
+<section class="owner-page-head">
+  <div>
+    <span class="owner-eyebrow">PANEL PATRIMONIAL</span>
+    <h1>Hola, {{ session.user.name }}.</h1>
+    <p>Lo importante de tus propiedades, sin información innecesaria.</p>
+  </div>
+  <div class="owner-period">
+    <span>PERÍODO</span>
+    <strong>{{ economy.monthLabel | capitalize }}</strong>
+  </div>
+</section>
+
+<nav class="owner-section-nav" aria-label="Secciones del propietario">
+  <button type="button" class="is-active" data-owner-tab="resumen">Resumen</button>
+  <button type="button" data-owner-tab="propiedades">Propiedades</button>
+  <button type="button" data-owner-tab="reclamos">
+    Reclamos
+    {% if stats.openComplaints %}<span>{{ stats.openComplaints }}</span>{% endif %}
+  </button>
+  <button type="button" data-owner-tab="economia">Economía</button>
+  <button type="button" data-owner-tab="vencimientos">Vencimientos</button>
+</nav>
+
+<section class="owner-tab-panel is-active" data-owner-panel="resumen">
+  <div class="owner-kpi-grid">
+    <article class="owner-kpi">
+      <span>Propiedades</span>
+      <strong>{{ stats.total }}</strong>
+      <small>{{ stats.rented }} alquiladas · {{ stats.vacant }} vacía{% if stats.vacant != 1 %}s{% endif %}</small>
+    </article>
+
+    <article class="owner-kpi">
+      <span>Alquiler mensual</span>
+      <strong>{{ money(economy.expectedRent,'UYU') }}</strong>
+      <small>Ingreso mensual esperado</small>
+    </article>
+
+    <article class="owner-kpi">
+      <span>Cobrado este mes</span>
+      <strong>{{ money(economy.collectedRent,'UYU') }}</strong>
+      <small>{% if economy.pendingRent %}{{ money(economy.pendingRent,'UYU') }} pendiente{% else %}Sin cobros pendientes registrados{% endif %}</small>
+    </article>
+
+    <article class="owner-kpi owner-kpi-alert">
+      <span>Reclamos abiertos</span>
+      <strong>{{ stats.openComplaints }}</strong>
+      <small>{% if stats.openComplaints %}Requieren seguimiento{% else %}Todo al día{% endif %}</small>
+    </article>
+  </div>
+
+  <div class="owner-two-col owner-summary-columns">
+    <section class="owner-card">
+      <div class="owner-card-head">
+        <div>
+          <span class="owner-eyebrow">PRIORIDAD</span>
+          <h2>Lo que requiere atención</h2>
+        </div>
+      </div>
+
+      <div class="owner-attention-list">
+        {% for item in attention %}
+        <a href="/propietario/propiedades/{{ item.propertyCode }}" class="owner-attention-item">
+          <span class="owner-status-dot owner-status-{{ item.level }}"></span>
+          <div>
+            <strong>{{ item.title }}</strong>
+            <span>{{ item.propertyCode }} · {{ item.property.address }}</span>
+            <small>{{ item.detail }}</small>
+          </div>
+          {% if item.amount %}
+          <b>{{ money(item.amount,'UYU') }}</b>
+          {% endif %}
+        </a>
+        {% else %}
+        <div class="owner-empty">
+          <strong>Todo bajo control.</strong>
+          <span>No hay temas urgentes para mostrar.</span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="owner-card">
+      <div class="owner-card-head">
+        <div>
+          <span class="owner-eyebrow">AGENDA</span>
+          <h2>Próximos vencimientos</h2>
+        </div>
+        <button type="button" class="owner-text-action" data-jump-owner-tab="vencimientos">Ver todos</button>
+      </div>
+
+      <div class="owner-deadline-list owner-deadline-list-compact">
+        {% for a in summaryDeadlines %}
+        <a href="/propietario/propiedades/{{ a.propertyCode }}" class="owner-deadline-item">
+          <time>{{ a.dateShort }}</time>
+          <div>
+            <strong>{{ a.title }}</strong>
+            <span>{{ a.propertyCode }} · {{ a.type }}</span>
+          </div>
+          <span class="owner-state owner-state-{{ a.level }}">{{ a.statusText }}</span>
+        </a>
+        {% else %}
+        <div class="owner-empty">
+          <strong>Sin vencimientos pendientes.</strong>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <section class="owner-card owner-health-overview">
+    <div class="owner-card-head">
+      <div>
+        <span class="owner-eyebrow">PATRIMONIO</span>
+        <h2>Salud de las propiedades</h2>
+      </div>
+      <button type="button" class="owner-text-action" data-jump-owner-tab="propiedades">Ver propiedades</button>
+    </div>
+
+    <div class="owner-health-strip">
+      {% for p in summaryProperties %}
+      <a href="/propietario/propiedades/{{ p.code }}" class="owner-health-chip">
+        <span class="owner-status-dot owner-status-{{ p.health.level }}"></span>
+        <div>
+          <strong>{{ p.code }}</strong>
+          <span>{{ p.health.label }}</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+</section>
+
+<section class="owner-tab-panel" data-owner-panel="propiedades">
+  <div class="owner-section-title">
+    <div>
+      <span class="owner-eyebrow">PATRIMONIO</span>
+      <h2>Mis propiedades</h2>
+      <p>Buscá por código, dirección, barrio o inquilino.</p>
+    </div>
+  </div>
+
+  <div class="owner-property-toolbar">
+    <label class="owner-search">
+      <span>⌕</span>
+      <input type="search" placeholder="Buscar propiedad..." data-owner-property-search>
+    </label>
+
+    <div class="owner-filter-row" role="group" aria-label="Filtrar propiedades">
+      <button type="button" class="is-active" data-property-filter="todas">Todas</button>
+      <button type="button" data-property-filter="alquilada">Alquiladas</button>
+      <button type="button" data-property-filter="vacía">Vacías</button>
+      <button type="button" data-property-filter="reclamos">Con reclamos</button>
+    </div>
+  </div>
+
+  <div class="owner-property-list" data-owner-property-list>
+    {% for p in properties %}
+    <article
+      class="owner-property-row"
+      data-property-card
+      data-status="{{ p.status | lower }}"
+      data-complaints="{{ p.openComplaints }}"
+      data-search="{{ p.code }} {{ p.address }} {{ p.unit }} {{ p.neighborhood }} {{ p.type }} {{ p.tenant.name }}"
+    >
+      <div class="owner-property-photo">
+        <img src="{{ p.coverPhoto }}" alt="{{ p.address }}">
+        <span class="owner-property-code">{{ p.code }}</span>
+      </div>
+
+      <div class="owner-property-main">
+        <div class="owner-property-title">
+          <div>
+            <span>{{ p.type }} · {{ p.neighborhood }}</span>
+            <h3>{{ p.address }}{% if p.unit %} · {{ p.unit }}{% endif %}</h3>
+          </div>
+          <span class="owner-health-label owner-health-{{ p.health.level }}">
+            <i class="owner-status-dot owner-status-{{ p.health.level }}"></i>
+            {{ p.health.label }}
+          </span>
+        </div>
+
+        <div class="owner-property-meta">
+          <div>
+            <span>Alquiler</span>
+            <strong>{% if p.status == 'Vacía' %}—{% else %}{{ money(p.lease.amount,p.lease.currency) }}{% endif %}</strong>
+          </div>
+          <div>
+            <span>Inquilino</span>
+            <strong>{{ p.tenant.name or 'Sin inquilino' }}</strong>
+          </div>
+          <div>
+            <span>Cobro actual</span>
+            <strong>{{ p.currentPaymentStatus }}</strong>
+          </div>
+          <div>
+            <span>Reclamos</span>
+            <strong>{% if p.openComplaints %}{{ p.openComplaints }} abierto{% if p.openComplaints != 1 %}s{% endif %}{% else %}Sin abiertos{% endif %}</strong>
+          </div>
+        </div>
+      </div>
+
+      <a href="/propietario/propiedades/{{ p.code }}" class="owner-property-open" aria-label="Ver {{ p.address }}">Ver ficha →</a>
+    </article>
+    {% endfor %}
+  </div>
+
+  <div class="owner-empty owner-property-no-results" data-owner-no-results hidden>
+    <strong>No encontramos propiedades con ese filtro.</strong>
+  </div>
+</section>
+
+<section class="owner-tab-panel" data-owner-panel="reclamos">
+  <div class="owner-section-title">
+    <div>
+      <span class="owner-eyebrow">MANTENIMIENTO</span>
+      <h2>Reclamos y reparaciones</h2>
+      <p>Primero los abiertos; los resueltos quedan como historial.</p>
+    </div>
+  </div>
+
+  <div class="owner-claims-grid">
+    {% for c in complaints %}
+    <article class="owner-claim-card {% if c.status == 'Resuelto' or c.status == 'Cancelado' %}is-closed{% endif %}">
+      <div class="owner-claim-top">
+        <span>#{{ c.number }} · {{ c.category }}</span>
+        <span class="owner-claim-status">{{ c.status }}</span>
+      </div>
+      <h3>{{ c.title }}</h3>
+      <p>{{ c.propertyCode }}</p>
+      <div class="owner-claim-foot">
+        <span>{% if c.technicianName %}{{ c.technicianName }}{% else %}Sin técnico asignado{% endif %}</span>
+        <a href="/propietario/propiedades/{{ c.propertyCode }}#reclamos">Ver propiedad →</a>
+      </div>
+    </article>
+    {% else %}
+    <div class="owner-empty"><strong>Sin reclamos registrados.</strong></div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="owner-tab-panel" data-owner-panel="economia">
+  <div class="owner-section-title">
+    <div>
+      <span class="owner-eyebrow">ECONOMÍA</span>
+      <h2>Cómo está rindiendo el patrimonio</h2>
+      <p>Los importes se calculan con lo que QPROPIEDADES tiene registrado.</p>
+    </div>
+  </div>
+
+  <div class="owner-economy-hero">
+    <div>
+      <span>Alquiler mensual esperado</span>
+      <strong>{{ money(economy.expectedRent,'UYU') }}</strong>
+      <small>{{ stats.rented }} propiedades alquiladas</small>
+    </div>
+    <div>
+      <span>Cobrado en {{ economy.monthLabel }}</span>
+      <strong>{{ money(economy.collectedRent,'UYU') }}</strong>
+      <small>{{ money(economy.pendingRent,'UYU') }} pendiente registrado</small>
+    </div>
+    <div class="owner-economy-net">
+      <span>Resultado neto registrado</span>
+      <strong>{{ money(economy.netRecorded,'UYU') }}</strong>
+      <small>Cobros − impuestos pagados − reparaciones cargadas</small>
+    </div>
+  </div>
+
+  <div class="owner-two-col">
+    <section class="owner-card">
+      <div class="owner-card-head">
+        <div>
+          <span class="owner-eyebrow">SALIDAS</span>
+          <h2>Costos registrados</h2>
+        </div>
+      </div>
+      <div class="owner-money-lines">
+        <div><span>Impuestos pagados este mes</span><strong>− {{ money(economy.paidTaxes,'UYU') }}</strong></div>
+        <div><span>Reparaciones cargadas este mes</span><strong>− {{ money(economy.repairCosts,'UYU') }}</strong></div>
+        <div><span>Impuestos pendientes</span><strong>{{ money(economy.taxesPending,'UYU') }}</strong></div>
+      </div>
+      <p class="owner-help">
+        QPROPIEDADES no fija nombres de impuestos: muestra cualquier obligación cargada como impuesto/tributo, por lo que podés agregar o cambiar conceptos sin rediseñar esta pantalla.
+      </p>
+    </section>
+
+    <section class="owner-card">
+      <div class="owner-card-head">
+        <div>
+          <span class="owner-eyebrow">LECTURA RÁPIDA</span>
+          <h2>Estado de cobros</h2>
+        </div>
+      </div>
+      <div class="owner-progress">
+        <div class="owner-progress-track">
+          <span style="width: {{ economy.collectionPct }}%"></span>
+        </div>
+        <div>
+          <strong>{{ economy.collectionPct | round }}%</strong>
+          <span>del alquiler mensual esperado registrado como cobrado</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="owner-card">
+    <div class="owner-card-head">
+      <div>
+        <span class="owner-eyebrow">RESUMEN DEL MES</span>
+        <h2>Resultado económico</h2>
+      </div>
+    </div>
+
+    <div class="owner-money-lines">
+      <div>
+        <span>Alquiler mensual esperado</span>
+        <strong>{{ money(economy.expectedRent,'UYU') }}</strong>
+      </div>
+      <div>
+        <span>Alquiler cobrado</span>
+        <strong>{{ money(economy.collectedRent,'UYU') }}</strong>
+      </div>
+      <div>
+        <span>Pendiente de cobro</span>
+        <strong>{{ money(economy.pendingRent,'UYU') }}</strong>
+      </div>
+      <div>
+        <span>Impuestos pagados</span>
+        <strong>− {{ money(economy.paidTaxes,'UYU') }}</strong>
+      </div>
+      <div>
+        <span>Reparaciones</span>
+        <strong>− {{ money(economy.repairCosts,'UYU') }}</strong>
+      </div>
+    </div>
+
+    <div class="owner-economic-result">
+      <span>RESULTADO NETO REGISTRADO</span>
+      <strong>{{ money(economy.netRecorded,'UYU') }}</strong>
+      <small>Alquileres cobrados menos impuestos y reparaciones registradas.</small>
+    </div>
+  </section>
+</section>
+
+<section class="owner-tab-panel" data-owner-panel="vencimientos">
+  <div class="owner-section-title">
+    <div>
+      <span class="owner-eyebrow">AGENDA</span>
+      <h2>Vencimientos por concepto</h2>
+      <p>Cada categoría está ordenada por fecha, del vencimiento más próximo al más lejano.</p>
+    </div>
+  </div>
+
+  {% set groups = [
+    ['Contribución', deadlineGroups.contribucion],
+    ['Primaria', deadlineGroups.primaria],
+    ['Alquileres', deadlineGroups.alquileres],
+    ['Seguros', deadlineGroups.seguros],
+    ['Impuestos', deadlineGroups.impuestos],
+    ['Otros', deadlineGroups.otros]
+  ] %}
+
+  <div class="owner-deadline-groups">
+    {% for group in groups %}
+      {% if group[1] and group[1].length %}
+      <section class="owner-card owner-deadline-group">
+        <div class="owner-deadline-group-head">
+          <div>
+            <span class="owner-eyebrow">VENCIMIENTOS</span>
+            <h3>{{ group[0] }}</h3>
+          </div>
+          <span class="owner-deadline-count">{{ group[1].length }}</span>
+        </div>
+
+        <div class="owner-deadline-list owner-deadline-full">
+          {% for a in group[1] %}
+          <a href="/propietario/propiedades/{{ a.propertyCode }}" class="owner-deadline-item">
+            <time>
+              <strong>{{ a.dateShort }}</strong>
+              <small>{{ a.dateLabel }}</small>
+            </time>
+
+            <div>
+              <strong>{{ a.title }}</strong>
+              <span>{{ a.propertyCode }} · {{ a.property.address if a.property else a.type }}</span>
+            </div>
+
+            {% if a.amount %}
+            <b>{{ money(a.amount,a.currency) }}</b>
+            {% endif %}
+
+            <span class="owner-state owner-state-{{ a.level }}">{{ a.statusText }}</span>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+    {% endfor %}
+
+    {% if not deadlines.length %}
+    <div class="owner-empty">
+      <strong>Sin vencimientos pendientes.</strong>
+      <span>No hay obligaciones futuras registradas para mostrar.</span>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

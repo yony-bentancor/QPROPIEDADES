@@ -1,0 +1,37 @@
+{% extends 'layouts/admin.njk' %}
+{% block content %}
+<style>@import url('/css/admin-owners.css');</style>
+<div class="owners-page">
+  <header class="owners-head">
+    <div><span class="eyebrow">CARTERA</span><h1>Propietarios</h1><p>Ficha, propiedades y comunicación directa con cada propietario.</p></div>
+    <a class="btn btn-primary" href="/admin/propietarios/nuevo">+ Nuevo propietario</a>
+  </header>
+
+  <div class="owners-grid">
+    {% for owner in owners %}
+    <article class="owner-card">
+      <div class="owner-card-main">
+        <span class="owner-initial">{{ owner.name | first | upper }}</span>
+        <div><h2>{{ owner.name }}</h2><p>{{ owner.document or 'Sin documento' }}</p></div>
+      </div>
+      <div class="owner-contact">
+        <span>{{ owner.phone or 'Sin teléfono' }}</span>
+        <span>{{ owner.email or 'Sin email' }}</span>
+      </div>
+      <div class="owner-stats">
+        <div><strong>{{ owner.propertyCount }}</strong><span>Propiedades</span></div>
+        <div><strong>{{ owner.rentedCount }}</strong><span>Alquiladas</span></div>
+        <div><strong>{{ owner.openClaims }}</strong><span>Reclamos</span></div>
+      </div>
+      <div class="owner-card-actions">
+        <a class="btn btn-light" href="/admin/propietarios/{{ owner.id }}">Ver ficha</a>
+        {% if owner.whatsappUrl %}<a class="btn btn-light" target="_blank" rel="noopener" href="{{ owner.whatsappUrl }}">WhatsApp</a>{% endif %}
+        <a class="owner-edit" href="/admin/propietarios/{{ owner.id }}/editar">Editar</a>
+      </div>
+    </article>
+    {% else %}
+    <div class="owner-empty"><strong>No hay propietarios cargados.</strong></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

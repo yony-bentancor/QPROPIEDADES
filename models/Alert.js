@@ -1,0 +1,1 @@
+const mongoose=require('mongoose');const S=new mongoose.Schema({propertyCode:{type:String,index:true},type:String,title:String,dueDate:Date,amount:Number,currency:String,paid:{type:Boolean,default:false},recurring:{type:Boolean,default:false},recurrence:String,notes:String},{timestamps:true});module.exports=mongoose.model('Alert',S);

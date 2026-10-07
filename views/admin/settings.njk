@@ -1,0 +1,131 @@
+{% extends 'layouts/admin.njk' %}
+{% block content %}
+<link rel="stylesheet" href="/css/salary-calculator.css">
+
+<div class="page-head">
+  <div>
+    <span class="eyebrow">SISTEMA</span>
+    <h1>Configuración</h1>
+    <p class="muted">Herramientas internas y estado general de QPROPIEDADES.</p>
+  </div>
+</div>
+
+<section
+  class="salary-calculator"
+  data-salary-calculator
+  data-total-rent="{{ salaryCalculator.totalMonthlyRent }}"
+  data-complaints="{{ salaryCalculator.monthlyComplaints }}"
+>
+  <div class="salary-calculator-head">
+    <div>
+      <span class="eyebrow">CALCULADORA LIVE</span>
+      <h2>Calculadora de ingresos</h2>
+      <p>
+        Simulá tu ingreso mensual usando únicamente dos variables:
+        porcentaje sobre alquileres y valor por reclamo.
+      </p>
+    </div>
+    <div class="salary-period">
+      <span>PERÍODO</span>
+      <strong>{{ salaryCalculator.monthLabel | capitalize }}</strong>
+    </div>
+  </div>
+
+  <div class="salary-base-grid">
+    <div class="salary-base-card">
+      <span>Alquiler mensual administrado</span>
+      <strong>{{ money(salaryCalculator.totalMonthlyRent, 'UYU') }}</strong>
+      <small>{{ salaryCalculator.rentedProperties }} propiedades alquiladas</small>
+    </div>
+
+    <div class="salary-base-card">
+      <span>Reclamos creados este mes</span>
+      <strong>{{ salaryCalculator.monthlyComplaints }}</strong>
+      <small>{{ salaryCalculator.openMonthlyComplaints }} continúan abiertos</small>
+    </div>
+  </div>
+
+  <div class="salary-input-grid">
+    <label class="salary-input-card">
+      <span class="salary-step">01</span>
+      <div>
+        <strong>Porcentaje sobre alquileres</strong>
+        <small>Ejemplo: 3%, 5% u 8%.</small>
+      </div>
+      <div class="salary-field suffix-percent">
+        <input
+          type="number"
+          min="0"
+          max="100"
+          step="0.1"
+          value="0"
+          inputmode="decimal"
+          data-rent-percent
+          aria-label="Porcentaje sobre alquileres"
+        >
+        <span>%</span>
+      </div>
+    </label>
+
+    <label class="salary-input-card">
+      <span class="salary-step">02</span>
+      <div>
+        <strong>Valor por reclamo</strong>
+        <small>Importe que cobrás por cada reclamo del mes.</small>
+      </div>
+      <div class="salary-field prefix-currency">
+        <span>$</span>
+        <input
+          type="number"
+          min="0"
+          step="100"
+          value="0"
+          inputmode="numeric"
+          data-claim-price
+          aria-label="Valor por reclamo"
+        >
+      </div>
+    </label>
+  </div>
+
+  <div class="salary-breakdown">
+    <div>
+      <span>Ingreso por administración</span>
+      <strong data-rent-income>$ 0</strong>
+      <small data-rent-formula>0% de {{ money(salaryCalculator.totalMonthlyRent, 'UYU') }}</small>
+    </div>
+
+    <div>
+      <span>Ingreso por reclamos</span>
+      <strong data-claims-income>$ 0</strong>
+      <small data-claims-formula>{{ salaryCalculator.monthlyComplaints }} reclamos × $ 0</small>
+    </div>
+
+    <div class="salary-total">
+      <span>SUELDO ESTIMADO</span>
+      <strong data-salary-total>$ 0</strong>
+      <small>Estimación mensual según los valores ingresados.</small>
+    </div>
+  </div>
+
+  <p class="salary-note" data-salary-message aria-live="polite">
+    Ingresá un porcentaje y/o un valor por reclamo. El resultado se actualiza automáticamente.
+  </p>
+</section>
+
+<section class="panel">
+  <h2>Estado de QPROPIEDADES V1</h2>
+  <div class="detail-grid">
+    <div><span>Datos</span><strong>DEMO en memoria</strong></div>
+    <div><span>MongoDB</span><strong>Modelos preparados</strong></div>
+    <div><span>Técnicos</span><strong>Sin registro propio</strong></div>
+    <div><span>QR público</span><strong>Activo</strong></div>
+  </div>
+  <p class="muted">
+    Preparado para crecer a MongoDB, almacenamiento cloud, usuarios de técnicos,
+    conciliación de alquileres y alertas automáticas.
+  </p>
+</section>
+
+<script src="/js/salary-calculator.js" defer></script>
+{% endblock %}

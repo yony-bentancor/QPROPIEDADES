@@ -1,0 +1,20 @@
+{% extends 'layouts/base.njk' %}
+{% block body %}
+<link rel="stylesheet" href="/css/qpropiedades-front.css">
+<div class="qp-page qp-inner-page">
+  <main class="qp-success-page">
+    <section class="qp-success-card">
+      <span class="qp-success-icon">✓</span>
+      <span class="qp-kicker">RECLAMO RECIBIDO</span>
+      <h1>Gracias. Ya quedó registrado.</h1>
+      <p>Tu número de seguimiento es:</p>
+      <strong class="qp-claim-number">#{{ complaint.number }}</strong>
+      <p>Guardalo. Podés consultar el estado de tu reclamo desde la portada.</p>
+      <div class="qp-actions qp-actions-center">
+        <a href="/seguimiento" class="qp-btn qp-btn-primary">Ver estado del reclamo</a>
+        <a href="/" class="qp-btn qp-btn-outline">Ir al inicio</a>
+      </div>
+    </section>
+  </main>
+</div>
+{% endblock %}

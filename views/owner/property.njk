@@ -1,0 +1,275 @@
+{% extends 'layouts/owner.njk' %}
+{% block content %}
+<a href="/propietario#propiedades" class="owner-back">← Volver a propiedades</a>
+
+<section class="owner-property-head">
+  <div>
+    <div class="owner-property-head-line">
+      <span class="owner-eyebrow">{{ property.code }} · {{ property.type }}</span>
+      <span class="owner-health-label owner-health-{{ health.level }}">
+        <i class="owner-status-dot owner-status-{{ health.level }}"></i>
+        Salud {{ health.label }}
+      </span>
+    </div>
+    <h1>{{ property.address }}{% if property.unit %} · {{ property.unit }}{% endif %}</h1>
+    <p>{{ property.neighborhood }} · {{ property.city }}</p>
+  </div>
+</section>
+
+<div class="owner-property-summary">
+  <div class="owner-property-summary-photo">
+    <img src="{{ property.coverPhoto }}" alt="{{ property.address }}">
+  </div>
+  <div class="owner-property-summary-grid">
+    <div><span>Estado</span><strong>{{ property.status }}</strong></div>
+    <div><span>Alquiler</span><strong>{% if property.status == 'Vacía' %}—{% else %}{{ money(property.lease.amount,property.lease.currency) }}{% endif %}</strong></div>
+    <div><span>Inquilino</span><strong>{{ property.tenant.name or 'Sin inquilino' }}</strong></div>
+    <div><span>Reclamos abiertos</span><strong>{{ openComplaints | length }}</strong></div>
+    <div><span>Contrato</span><strong>{{ property.lease.status }}</strong></div>
+    <div><span>Próximo vencimiento</span><strong>{% if nextDeadlines | length %}{{ nextDeadlines[0].dateLabel }}{% else %}Sin pendientes{% endif %}</strong></div>
+  </div>
+</div>
+
+<nav class="owner-property-tabs" aria-label="Información de la propiedad">
+  <button type="button" class="is-active" data-property-tab="ficha">Ficha</button>
+  <button type="button" data-property-tab="alquiler">Alquiler</button>
+  <button type="button" data-property-tab="reclamos">Reclamos</button>
+  <button type="button" data-property-tab="economia">Economía</button>
+  <button type="button" data-property-tab="documentos">Documentos</button>
+  <button type="button" data-property-tab="historial">Historial</button>
+</nav>
+
+<section class="owner-property-panel is-active" data-property-panel="ficha">
+  <div class="owner-two-col">
+    <section class="owner-card">
+      <div class="owner-card-head">
+        <div>
+          <span class="owner-eyebrow">PROPIEDAD</span>
+          <h2>Ficha</h2>
+        </div>
+      </div>
+      <div class="owner-detail-list">
+        <div><span>Tipo</span><strong>{{ property.type }}</strong></div>
+        <div><span>Padrón</span><strong>{{ property.cadastralNumber }}</strong></div>
+        <div><span>Superficie construida</span><strong>{{ property.builtArea }} m²</strong></div>
+        {% if property.landArea %}<div><span>Terreno</span><strong>{{ property.landArea }} m²</strong></div>{% endif %}
+        <div><span>Año</span><strong>{{ property.yearBuilt or 'Sin dato' }}</strong></div>
+        <div><span>Baños</span><strong>{{ property.bathrooms }}</strong></div>
+      </div>
+      {% if property.notes %}<p class="owner-help">{{ property.notes }}</p>{% endif %}
+      {% if property.mapUrl %}<a href="{{ property.mapUrl }}" target="_blank" rel="noopener" class="owner-inline-link">Ver ubicación →</a>{% endif %}
+    </section>
+
+    <section class="owner-card">
+      <div class="owner-card-head">
+        <div>
+          <span class="owner-eyebrow">OCUPACIÓN</span>
+          <h2>Inquilino</h2>
+        </div>
+      </div>
+      {% if property.tenant.name %}
+      <div class="owner-detail-list">
+        <div><span>Nombre</span><strong>{{ property.tenant.name }}</strong></div>
+        <div><span>Teléfono</span><strong>{{ property.tenant.phone or 'Sin dato' }}</strong></div>
+        <div><span>Email</span><strong>{{ property.tenant.email or 'Sin dato' }}</strong></div>
+        <div><span>Garantía</span><strong>{{ property.lease.guaranteeType or 'Sin dato' }}</strong></div>
+      </div>
+      {% else %}
+      <div class="owner-empty">
+        <strong>Propiedad vacía.</strong>
+        <span>No hay inquilino ni contrato activo cargado.</span>
+      </div>
+      {% endif %}
+    </section>
+  </div>
+
+  <section class="owner-card">
+    <div class="owner-card-head">
+      <div>
+        <span class="owner-eyebrow">SALUD</span>
+        <h2>Estado actual</h2>
+      </div>
+    </div>
+
+    <div class="owner-health-detail">
+      <div>
+        <span class="owner-status-dot owner-status-{{ health.level }}"></span>
+        <div>
+          <strong>{{ health.label }}</strong>
+          <span>{{ health.detail }}</span>
+        </div>
+      </div>
+      <div>
+        <span>Alquiler</span>
+        <strong>{{ property.lease.status }}</strong>
+      </div>
+      <div>
+        <span>Reclamos</span>
+        <strong>{% if openComplaints | length %}{{ openComplaints | length }} abiertos{% else %}Sin abiertos{% endif %}</strong>
+      </div>
+      <div>
+        <span>Vencimientos</span>
+        <strong>{{ nextDeadlines | length }} pendientes</strong>
+      </div>
+    </div>
+  </section>
+</section>
+
+<section class="owner-property-panel" data-property-panel="alquiler">
+  <div class="owner-two-col">
+    <section class="owner-card">
+      <div class="owner-card-head">
+        <div><span class="owner-eyebrow">CONTRATO</span><h2>Alquiler</h2></div>
+      </div>
+      <div class="owner-detail-list">
+        <div><span>Importe mensual</span><strong>{{ money(property.lease.amount,property.lease.currency) }}</strong></div>
+        <div><span>Día de pago</span><strong>{{ property.lease.paymentDay }}</strong></div>
+        <div><span>Inicio</span><strong>{{ property.lease.startDate or 'Sin dato' }}</strong></div>
+        <div><span>Vencimiento</span><strong>{{ property.lease.endDate or 'Sin dato' }}</strong></div>
+        <div><span>Garantía</span><strong>{{ property.lease.guaranteeType or 'Sin dato' }}</strong></div>
+        <div><span>Ajuste</span><strong>{{ property.lease.adjustment or 'Sin dato' }}</strong></div>
+      </div>
+    </section>
+
+    <section class="owner-card">
+      <div class="owner-card-head">
+        <div><span class="owner-eyebrow">COBROS</span><h2>Histórico registrado</h2></div>
+      </div>
+      <div class="owner-simple-list">
+        {% for p in payments %}
+        <div>
+          <div><strong>{{ p.concept or p.period }}</strong><span>{{ p.dueDate }}</span></div>
+          <b>{{ money(p.amount,p.currency) }}</b>
+          <span class="owner-payment-status">{{ p.status }}</span>
+        </div>
+        {% else %}
+        <div class="owner-empty"><strong>Sin cobros registrados.</strong></div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</section>
+
+<section class="owner-property-panel" data-property-panel="reclamos">
+  <div class="owner-section-title">
+    <div><span class="owner-eyebrow">REPARACIONES</span><h2>Reclamos de esta propiedad</h2></div>
+  </div>
+  <div class="owner-claims-grid">
+    {% for c in complaints %}
+    <article class="owner-claim-card {% if c.status == 'Resuelto' or c.status == 'Cancelado' %}is-closed{% endif %}">
+      <div class="owner-claim-top">
+        <span>#{{ c.number }} · {{ c.category }}</span>
+        <span class="owner-claim-status">{{ c.status }}</span>
+      </div>
+      <h3>{{ c.title }}</h3>
+      <p>{{ c.description }}</p>
+      <div class="owner-claim-foot">
+        <span>{% if c.technicianName %}{{ c.technicianName }}{% else %}Sin técnico asignado{% endif %}</span>
+        {% if c.finalCost or c.actualCost or c.repairCost or c.cost %}
+        <strong>Costo cargado</strong>
+        {% endif %}
+      </div>
+    </article>
+    {% else %}
+    <div class="owner-empty"><strong>Esta propiedad no tiene reclamos.</strong></div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="owner-property-panel" data-property-panel="economia">
+  <div class="owner-economy-hero">
+    <div>
+      <span>Alquileres cobrados registrados</span>
+      <strong>{{ money(propertyEconomy.paidRent,'UYU') }}</strong>
+      <small>Histórico disponible en QPROPIEDADES</small>
+    </div>
+    <div>
+      <span>Impuestos pagados registrados</span>
+      <strong>{{ money(propertyEconomy.paidTaxes,'UYU') }}</strong>
+      <small>Cualquier obligación clasificada como impuesto/tributo</small>
+    </div>
+    <div class="owner-economy-net">
+      <span>Resultado neto registrado</span>
+      <strong>{{ money(propertyEconomy.netRecorded,'UYU') }}</strong>
+      <small>Alquileres cobrados − impuestos pagados − reparaciones</small>
+    </div>
+  </div>
+
+  <div class="owner-two-col">
+    <section class="owner-card">
+      <div class="owner-card-head">
+        <div><span class="owner-eyebrow">IMPUESTOS</span><h2>Obligaciones</h2></div>
+      </div>
+      <div class="owner-simple-list">
+        {% for a in taxAlerts %}
+        <div>
+          <div><strong>{{ a.title }}</strong><span>{{ a.dueDate }} · {{ a.statusText }}</span></div>
+          <b>{{ money(a.amount,a.currency) }}</b>
+        </div>
+        {% else %}
+        <div class="owner-empty"><strong>Sin impuestos registrados.</strong></div>
+        {% endfor %}
+      </div>
+      <p class="owner-help">
+        Los conceptos son dinámicos: si mañana cambia o se agrega un impuesto, se mostrará con el nombre cargado en QPROPIEDADES.
+      </p>
+    </section>
+
+    <section class="owner-card">
+      <div class="owner-card-head">
+        <div><span class="owner-eyebrow">REPARACIONES</span><h2>Costos</h2></div>
+      </div>
+      <div class="owner-big-number">
+        <span>Costo registrado</span>
+        <strong>{{ money(propertyEconomy.repairCosts,'UYU') }}</strong>
+        <small>Se suma automáticamente cuando un reclamo tenga costo/finalCost cargado.</small>
+      </div>
+    </section>
+  </div>
+</section>
+
+<section class="owner-property-panel" data-property-panel="documentos">
+  <section class="owner-card">
+    <div class="owner-card-head">
+      <div><span class="owner-eyebrow">ARCHIVO</span><h2>Documentos</h2></div>
+    </div>
+    <div class="owner-document-list">
+      {% for d in documents %}
+      <div>
+        <span class="owner-document-icon">▤</span>
+        <div>
+          <strong>{{ d.title }}</strong>
+          <span>{{ d.type }}{% if d.dueDate %} · vence {{ d.dueDate }}{% endif %}</span>
+        </div>
+      </div>
+      {% else %}
+      <div class="owner-empty"><strong>Sin documentos registrados.</strong></div>
+      {% endfor %}
+    </div>
+  </section>
+</section>
+
+<section class="owner-property-panel" data-property-panel="historial">
+  <section class="owner-card">
+    <div class="owner-card-head">
+      <div><span class="owner-eyebrow">LÍNEA DE TIEMPO</span><h2>Historial de la propiedad</h2></div>
+    </div>
+    <div class="owner-timeline">
+      {% for e in timeline %}
+      <article>
+        <time>{{ e.dateLabel }}</time>
+        <span class="owner-timeline-dot owner-timeline-{{ e.tone }}"></span>
+        <div>
+          <span>{{ e.type }}</span>
+          <strong>{{ e.title }}</strong>
+          {% if e.detail %}<p>{{ e.detail }}</p>{% endif %}
+          {% if e.amount %}<b>{{ money(e.amount,e.currency) }}</b>{% endif %}
+        </div>
+      </article>
+      {% else %}
+      <div class="owner-empty"><strong>Sin actividad histórica registrada.</strong></div>
+      {% endfor %}
+    </div>
+  </section>
+</section>
+{% endblock %}

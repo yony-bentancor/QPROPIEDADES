@@ -1,0 +1,1 @@
+const mongoose=require('mongoose');const S=new mongoose.Schema({propertyCode:{type:String,index:true},type:String,title:String,issueDate:Date,dueDate:Date,fileUrl:String,notes:String},{timestamps:true});module.exports=mongoose.model('Document',S);

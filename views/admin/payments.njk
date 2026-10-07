@@ -1,0 +1,255 @@
+{% extends 'layouts/admin.njk' %}
+
+{% block content %}
+<style>@import url('/css/admin-payments.css');</style>
+
+<div class="admin-payments-v2">
+  <div class="payments-head">
+    <div>
+      <span class="eyebrow">ALQUILERES</span>
+      <h1>Cobros</h1>
+      <p class="muted">Control mensual de alquileres esperados, cobrados y pendientes.</p>
+    </div>
+    <button class="btn btn-primary" type="button" id="openPaymentForm">+ Registrar cobro</button>
+  </div>
+
+  <form method="get" action="/admin/cobros" class="payments-toolbar">
+    <label>
+      <span>Período</span>
+      <select name="period" onchange="this.form.submit()">
+        {% for item in periodOptions %}
+        <option value="{{ item.value }}" {% if item.value == period %}selected{% endif %}>{{ item.label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      <span>Propietario</span>
+      <select name="owner" onchange="this.form.submit()">
+        <option value="all" {% if selectedOwner == 'all' %}selected{% endif %}>Todos los propietarios</option>
+        {% for owner in owners %}
+        <option value="{{ owner.key }}" {% if selectedOwner == owner.key %}selected{% endif %}>{{ owner.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <div class="payments-toolbar-copy">
+      <strong>{{ periodLabel | capitalize }}</strong>
+      <span>{{ stats.expectedCount }} alquileres esperados</span>
+    </div>
+  </form>
+
+  <section class="payment-stats">
+    <article class="payment-stat-card">
+      <span>Esperado del mes</span>
+      <strong>{{ money(stats.expected,'UYU') }}</strong>
+      <small>{{ stats.expectedCount }} alquileres</small>
+    </article>
+    <article class="payment-stat-card is-ok">
+      <span>Cobrado</span>
+      <strong>{{ money(stats.collected,'UYU') }}</strong>
+      <small>{{ stats.paidCount }} pagos registrados</small>
+    </article>
+    <article class="payment-stat-card is-warning">
+      <span>Pendiente</span>
+      <strong>{{ money(stats.pending,'UYU') }}</strong>
+      <small>{{ stats.pendingCount }} por cobrar</small>
+    </article>
+    <article class="payment-stat-card is-danger">
+      <span>Vencido</span>
+      <strong>{{ money(stats.overdue,'UYU') }}</strong>
+      <small>{{ stats.overdueCount }} atrasados</small>
+    </article>
+  </section>
+
+  <section class="payments-panel">
+    <div class="payments-panel-head">
+      <div>
+        <span class="eyebrow">ESTADO DE COBRO</span>
+        <h2>{{ periodLabel | capitalize }}</h2>
+      </div>
+
+      <div class="payment-status-filters" role="group" aria-label="Filtrar cobros">
+        <button type="button" class="payment-filter is-active" data-payment-filter="all">Todos <b>{{ payments | length }}</b></button>
+        <button type="button" class="payment-filter" data-payment-filter="Vencido">Vencidos <b>{{ stats.overdueCount }}</b></button>
+        <button type="button" class="payment-filter" data-payment-filter="Pendiente">Pendientes <b>{{ stats.pendingCount }}</b></button>
+        <button type="button" class="payment-filter" data-payment-filter="Pagado">Pagados <b>{{ stats.paidCount }}</b></button>
+      </div>
+    </div>
+
+    <div class="payments-table-wrap">
+      <div class="payments-table payment-table-header">
+        <span>Estado</span>
+        <span>Propiedad / inquilino</span>
+        <span>Propietario</span>
+        <span>Vence</span>
+        <span>Alquiler</span>
+        <span>Pago</span>
+        <span></span>
+      </div>
+
+      <div id="paymentsRows">
+        {% for payment in payments %}
+        <article class="payments-table payment-row" data-payment-row data-status="{{ payment.displayStatus }}">
+          <div>
+            <span class="payment-status status-{{ payment.displayStatus | lower }}">{{ payment.displayStatus }}</span>
+          </div>
+
+          <div class="payment-property">
+            <a href="/admin/propiedades/{{ payment.propertyCode }}">
+              <strong>{{ payment.propertyCode }} · {{ payment.property.address if payment.property else 'Propiedad' }}</strong>
+            </a>
+            <span>
+              {% if payment.property and payment.property.unit %}{{ payment.property.unit }} · {% endif %}
+              {% if payment.property and payment.property.tenant and payment.property.tenant.name %}
+                {{ payment.property.tenant.name }}
+              {% else %}
+                Sin inquilino
+              {% endif %}
+            </span>
+          </div>
+
+          <div class="payment-owner">
+            {% if payment.property and payment.property.owner %}
+              <strong>{{ payment.property.owner.name or 'Sin propietario' }}</strong>
+            {% else %}
+              <span>—</span>
+            {% endif %}
+          </div>
+
+          <div>
+            <strong>{{ payment.dueDateLabel }}</strong>
+          </div>
+
+          <div>
+            <strong>{{ money(payment.amount,payment.currency) }}</strong>
+          </div>
+
+          <div class="payment-paid-data">
+            {% if payment.displayStatus == 'Pagado' %}
+              <strong>{{ payment.paidAtLabel }}</strong>
+              {% if payment.method %}<span>{{ payment.method }}</span>{% endif %}
+            {% else %}
+              <span>Sin registrar</span>
+            {% endif %}
+          </div>
+
+          <div class="payment-actions">
+            {% if payment.displayStatus != 'Pagado' %}
+            <form method="post" action="/admin/cobros/{{ payment.id }}/toggle">
+              <button class="payment-action payment-action-primary">Registrar pago</button>
+            </form>
+            {% else %}
+            <details class="payment-more">
+              <summary>•••</summary>
+              <div>
+                <form method="post" action="/admin/cobros/{{ payment.id }}/toggle">
+                  <button>Deshacer pago</button>
+                </form>
+                <form method="post" action="/admin/cobros/{{ payment.id }}/eliminar" onsubmit="return confirm('¿Eliminar este registro de cobro?')">
+                  <button class="is-danger">Eliminar</button>
+                </form>
+              </div>
+            </details>
+            {% endif %}
+          </div>
+        </article>
+        {% else %}
+        <div class="payment-empty">
+          <strong>No hay cobros registrados para este período.</strong>
+          <span>Podés crear uno desde “Registrar cobro”.</span>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="payment-empty" id="paymentsNoResults" hidden>
+        <strong>No hay cobros con ese estado.</strong>
+      </div>
+    </div>
+  </section>
+
+  <div class="payment-modal" id="paymentModal" hidden>
+    <div class="payment-modal-backdrop" data-close-payment-modal></div>
+    <section class="payment-modal-card" role="dialog" aria-modal="true" aria-labelledby="paymentModalTitle">
+      <div class="payment-modal-head">
+        <div>
+          <span class="eyebrow">NUEVO REGISTRO</span>
+          <h2 id="paymentModalTitle">Registrar cobro</h2>
+        </div>
+        <button type="button" class="payment-modal-close" data-close-payment-modal aria-label="Cerrar">×</button>
+      </div>
+
+      <form method="post" action="/admin/cobros/nuevo" class="payment-modal-form">
+        <label class="payment-form-wide">
+          <span>Propiedad</span>
+          <select name="propertyCode" id="paymentProperty" required>
+            {% for p in properties %}
+            <option
+              value="{{ p.code }}"
+              data-amount="{{ p.amount }}"
+              data-currency="{{ p.currency }}"
+              data-payment-day="{{ p.paymentDay }}"
+              data-tenant="{{ p.tenantName }}"
+              data-owner="{{ p.ownerName }}">
+              {{ p.code }} · {{ p.address }}{% if p.unit %} · {{ p.unit }}{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+          <small id="paymentPropertyHelp"></small>
+        </label>
+
+        <label>
+          <span>Período</span>
+          <input name="period" id="paymentPeriod" value="{{ period }}" required>
+        </label>
+
+        <label>
+          <span>Fecha de vencimiento</span>
+          <input type="date" name="dueDate" id="paymentDueDate" required>
+        </label>
+
+        <label>
+          <span>Importe</span>
+          <input type="number" name="amount" id="paymentAmount" required>
+        </label>
+
+        <label>
+          <span>Moneda</span>
+          <input name="currency" id="paymentCurrency" value="UYU" required>
+        </label>
+
+        <label>
+          <span>Fecha de pago</span>
+          <input type="date" name="paidAt" id="paymentPaidAt" value="{{ today }}">
+        </label>
+
+        <label>
+          <span>Método</span>
+          <select name="method">
+            <option value="">Sin especificar</option>
+            <option>Transferencia</option>
+            <option>Efectivo</option>
+            <option>Débito</option>
+            <option>Otro</option>
+          </select>
+        </label>
+
+        <label class="payment-form-wide">
+          <span>Referencia <em>opcional</em></span>
+          <input name="reference" placeholder="N.º de transferencia, recibo, etc.">
+        </label>
+
+        <input type="hidden" name="concept" id="paymentConcept" value="Alquiler {{ periodLabel }}">
+        <input type="hidden" name="status" value="Pagado">
+
+        <div class="payment-modal-actions payment-form-wide">
+          <button type="button" class="btn btn-light" data-close-payment-modal>Cancelar</button>
+          <button class="btn btn-primary">Guardar pago</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</div>
+
+<script src="/js/admin-payments.js"></script>
+{% endblock %}

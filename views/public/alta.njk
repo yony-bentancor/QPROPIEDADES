@@ -1,0 +1,65 @@
+{% extends 'layouts/base.njk' %}
+{% block body %}
+<link rel="stylesheet" href="/css/qpropiedades-front.css?v=51">
+<div class="qp-page qp-inner-page">
+  <header class="qp-nav">
+    <a class="qp-brand" href="/">
+      <span class="qp-brand-mark">Q</span>
+      <span class="qp-brand-name">QPROPIEDADES</span>
+    </a>
+    <button class="qp-mobile-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" data-qp-mobile-toggle><span></span><span></span><span></span></button>
+    <nav class="qp-menu" data-qp-mobile-nav>
+      <a href="/">Inicio</a>
+      <a href="/seguimiento">Soy inquilino</a>
+      <a href="/ingresar" class="qp-login">Ingresar</a>
+    </nav>
+  </header>
+  <div class="qp-mobile-backdrop" data-qp-mobile-backdrop></div>
+
+  <main class="qp-form-shell">
+    <section class="qp-form-intro">
+      <span class="qp-kicker">PARA PROPIETARIOS</span>
+      <h1>Empezá a gestionar tus propiedades.</h1>
+      <p>Dejanos tus datos y la cantidad aproximada de propiedades. Nos ponemos en contacto contigo.</p>
+      <a href="/" class="qp-back">← Volver al inicio</a>
+    </section>
+
+    <section class="qp-form-card">
+      {% if enviado %}
+        <div class="qp-success-box">
+          <span>✓</span>
+          <h2>Solicitud recibida</h2>
+          <p>Gracias. Ya tenemos tus datos y podremos continuar el alta.</p>
+          <a href="/" class="qp-btn qp-btn-primary">Volver al inicio</a>
+        </div>
+      {% else %}
+        <form method="post" action="/alta">
+          <label>Nombre y apellido
+            <input type="text" name="name" required autocomplete="name">
+          </label>
+          <label>Email
+            <input type="email" name="email" required autocomplete="email">
+          </label>
+          <label>Teléfono
+            <input type="tel" name="phone" required autocomplete="tel">
+          </label>
+          <label>Cantidad de propiedades
+            <select name="propertiesCount" required>
+              <option value="">Seleccionar</option>
+              <option>1 a 3</option>
+              <option>4 a 10</option>
+              <option>11 a 30</option>
+              <option>Más de 30</option>
+            </select>
+          </label>
+          <label>¿Qué te gustaría gestionar?
+            <textarea name="message" rows="4" placeholder="Alquileres, vencimientos, documentos, mantenimiento..."></textarea>
+          </label>
+          <button class="qp-btn qp-btn-primary qp-btn-full" type="submit">Enviar solicitud</button>
+        </form>
+      {% endif %}
+    </section>
+  </main>
+</div>
+<script src="/js/qpropiedades-mobile-nav.js?v=51" defer></script>
+{% endblock %}

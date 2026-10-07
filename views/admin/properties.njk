@@ -1,0 +1,118 @@
+{% extends 'layouts/admin.njk' %}
+
+{% block content %}
+<style>@import url('/css/admin-properties.css');</style>
+
+<div class="admin-properties-v2">
+  <div class="page-head properties-page-head">
+    <div>
+      <span class="eyebrow">INMUEBLES</span>
+      <h1>Propiedades</h1>
+      <p class="muted">Vista compacta para ubicar y revisar rápidamente cada inmueble administrado.</p>
+    </div>
+    <a href="/admin/propiedades/nueva" class="btn btn-primary">+ Nueva propiedad</a>
+  </div>
+
+  <section class="properties-toolbar" aria-label="Buscar y filtrar propiedades">
+    <div class="properties-search">
+      <span class="properties-search-icon" aria-hidden="true">⌕</span>
+      <input
+        id="propertySearch"
+        type="search"
+        placeholder="Buscar dirección, código, padrón, barrio o propietario..."
+        autocomplete="off"
+        aria-label="Buscar propiedades">
+    </div>
+
+    <div class="properties-filters" role="group" aria-label="Filtrar por estado">
+      <button type="button" class="property-filter is-active" data-property-filter="all">Todas</button>
+      <button type="button" class="property-filter" data-property-filter="Alquilada">Alquiladas</button>
+      <button type="button" class="property-filter" data-property-filter="Vacía">Vacías</button>
+      <button type="button" class="property-filter" data-property-filter="inactive">Inactivas</button>
+    </div>
+
+    <div class="properties-result-count">
+      <strong id="propertyVisibleCount">{{ properties | length }}</strong>
+      <span>visibles</span>
+    </div>
+  </section>
+
+  <div class="properties-compact-grid" id="propertiesGrid">
+    {% for p in properties %}
+    <article
+      class="property-compact-card"
+      data-property-card
+      data-status="{{ p.status or '' }}"
+      data-active="{% if p.active %}true{% else %}false{% endif %}"
+      data-search="{{ p.code }} {{ p.address }} {{ p.unit }} {{ p.neighborhood }} {{ p.cadastralNumber }} {{ p.type }} {{ p.owner.name }} {{ p.tenant.name }}">
+
+      <a href="/admin/propiedades/{{ p.code }}" class="property-compact-photo" aria-label="Abrir {{ p.address }}">
+        {% if p.coverPhoto %}
+        <img src="{{ p.coverPhoto }}" alt="Fachada de {{ p.address }}" loading="lazy">
+        {% else %}
+        <div class="property-photo-empty">Sin foto</div>
+        {% endif %}
+
+        <span class="property-code">{{ p.code }}</span>
+
+        {% if p.status == 'Vacía' %}
+        <span class="property-state property-state-vacant">Vacía</span>
+        {% elif p.active %}
+        <span class="property-state property-state-rented">{{ p.status or 'Activa' }}</span>
+        {% else %}
+        <span class="property-state property-state-inactive">Inactiva</span>
+        {% endif %}
+      </a>
+
+      <div class="property-compact-body">
+        <div class="property-compact-type">{{ p.type }}</div>
+
+        <a href="/admin/propiedades/{{ p.code }}" class="property-compact-title">
+          {{ p.address }}
+        </a>
+
+        <div class="property-compact-location">
+          <span>{{ p.unit or 'Sin unidad' }}</span>
+          {% if p.neighborhood %}<span>· {{ p.neighborhood }}</span>{% endif %}
+        </div>
+
+        <div class="property-compact-meta">
+          <div>
+            <span class="property-meta-label">Propietario</span>
+            <strong>{{ p.owner.name or 'Sin propietario' }}</strong>
+          </div>
+
+          <div>
+            <span class="property-meta-label">Inquilino</span>
+            <strong>
+              {% if p.status == 'Vacía' %}
+                Sin alquilar
+              {% else %}
+                {{ p.tenant.name or 'Sin datos' }}
+              {% endif %}
+            </strong>
+          </div>
+        </div>
+
+        <div class="property-compact-footer">
+          <span>Padrón {{ p.cadastralNumber or '—' }}</span>
+          <a href="/admin/propiedades/{{ p.code }}">Ver ficha →</a>
+        </div>
+      </div>
+    </article>
+    {% else %}
+    <div class="properties-empty">
+      <strong>No hay propiedades cargadas.</strong>
+      <span>Cuando agregues una propiedad aparecerá en esta vista.</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="properties-no-results" id="propertiesNoResults" hidden>
+    <strong>No encontramos propiedades con ese filtro.</strong>
+    <span>Probá con otra dirección, código, padrón o estado.</span>
+  </div>
+</div>
+
+<script src="/js/admin-properties.js"></script>
+{% endblock %}

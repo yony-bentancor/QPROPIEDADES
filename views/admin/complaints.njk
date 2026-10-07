@@ -1,0 +1,78 @@
+{% extends 'layouts/admin.njk' %}
+{% block content %}
+<style>@import url('/css/admin-complaints.css');</style>
+
+<div class="admin-complaints-v2">
+  <header class="ac-head">
+    <div>
+      <span class="eyebrow">OPERACIÓN</span>
+      <h1>Reclamos</h1>
+      <p class="muted">Propiedad, propietario, inquilino y acciones directas en una sola vista.</p>
+    </div>
+  </header>
+
+  <section class="ac-kpis">
+    <article><span>TOTAL</span><strong>{{ stats.total }}</strong></article>
+    <article><span>ABIERTOS</span><strong>{{ stats.open }}</strong></article>
+    <article><span>PRIORIDAD ALTA</span><strong>{{ stats.urgent }}</strong></article>
+    <article><span>SIN TÉCNICO</span><strong>{{ stats.unassigned }}</strong></article>
+  </section>
+
+  <section class="ac-panel">
+    <div class="ac-table ac-table-head">
+      <span>Reclamo</span>
+      <span>Propiedad</span>
+      <span>Propietario</span>
+      <span>Inquilino</span>
+      <span>Problema</span>
+      <span>Estado</span>
+      <span>Acciones</span>
+    </div>
+
+    {% for c in complaints %}
+    <article class="ac-table ac-row">
+      <div class="ac-number">
+        <strong>#{{ c.number }}</strong>
+        <small>{{ c.priority or 'Normal' }}</small>
+      </div>
+
+      <div>
+        <a class="ac-main-link" href="/admin/propiedades/{{ c.propertyCode }}">
+          {{ c.propertyCode }} · {{ c.property.address if c.property else 'Propiedad' }}
+          {% if c.property and c.property.unit %} · {{ c.property.unit }}{% endif %}
+        </a>
+        <small>{{ c.property.neighborhood if c.property else '' }}</small>
+      </div>
+
+      <div class="ac-person">
+        <strong>{{ c.owner.name if c.owner else (c.property.owner.name if c.property and c.property.owner else 'Sin propietario') }}</strong>
+        {% if c.ownerWhatsappUrl %}
+        <a href="{{ c.ownerWhatsappUrl }}" target="_blank" rel="noopener">WhatsApp</a>
+        {% endif %}
+      </div>
+
+      <div class="ac-person">
+        <strong>{{ c.tenant.name or 'Sin inquilino' }}</strong>
+        <small>{{ c.tenant.phone or '' }}</small>
+        {% if c.tenantWhatsappUrl %}
+        <a href="{{ c.tenantWhatsappUrl }}" target="_blank" rel="noopener">WhatsApp</a>
+        {% endif %}
+      </div>
+
+      <div class="ac-issue">
+        <strong>{{ c.title }}</strong>
+        <small>{{ c.category or '' }}</small>
+      </div>
+
+      <div><span class="ac-status">{{ c.status }}</span></div>
+
+      <div class="ac-actions">
+        <a href="/admin/reclamos/{{ c.number }}" class="ac-open">Abrir</a>
+      </div>
+    </article>
+    {% else %}
+    <div class="ac-empty">No hay reclamos para el propietario seleccionado.</div>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

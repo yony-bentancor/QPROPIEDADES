@@ -1,0 +1,63 @@
+{% extends 'layouts/base.njk' %}
+{% block styles %}<link rel="stylesheet" href="/css/admin-context.css"><link rel="stylesheet" href="/css/admin-mobile.css"><script src="/js/admin-mobile.js?v=51" defer></script>
+{% endblock %}
+{% block body %}
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="/admin" class="brand"><span class="brand-mark">Q</span><span>QPROPIEDADES</span></a><button class="admin-mobile-toggle" type="button" data-admin-menu aria-expanded="false" aria-label="Abrir menú">☰</button>
+    <nav>
+      <a href="/admin">Dashboard</a>
+      <a href="/admin/propiedades">Propiedades</a>
+      <a href="/admin/propietarios">Propietarios</a>
+      <a href="/admin/altas">Solicitudes de alta</a>
+      <a href="/admin/reclamos">Reclamos</a>
+      <a href="/admin/tecnicos">Técnicos / Empresas</a>
+      <a href="/admin/cobros">Cobros</a>
+      <a href="/admin/vencimientos">Vencimientos</a>
+      <a href="/admin/documentos">Documentos</a>
+      <a href="/admin/configuracion">Configuración</a>
+    </nav>
+    <div class="sidebar-footer">
+      <small>{{ sessionUser.name }}</small>
+      <form method="post" action="/salir"><button class="link-button">Salir</button></form>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="admin-global-context">
+      <div class="admin-global-context-copy">
+        <small>CONTEXTO DE ADMINISTRACIÓN</small>
+        {% if adminSelectedOwner %}
+          <strong>{{ adminSelectedOwner.name }}</strong>
+          <span>Estás viendo únicamente la información de este propietario.</span>
+        {% else %}
+          <strong>Toda la cartera</strong>
+          <span>Estás viendo la información global de todos los propietarios.</span>
+        {% endif %}
+      </div>
+
+      <form method="get" class="admin-global-context-form">
+        {% if period %}<input type="hidden" name="period" value="{{ period }}">{% endif %}
+        <select name="owner" onchange="this.form.submit()" aria-label="Cambiar propietario">
+          <option value="all" {% if adminOwnerId == 'all' %}selected{% endif %}>Todos los propietarios</option>
+          {% for owner in adminOwners %}
+            <option value="{{ owner.id }}" {% if adminOwnerId == owner.id %}selected{% endif %}>{{ owner.name }}</option>
+          {% endfor %}
+        </select>
+      </form>
+
+      {% if adminSelectedOwner %}
+      <div class="admin-global-context-actions">
+        <a class="context-action" href="/admin/propietarios/{{ adminSelectedOwner.id }}">Ver ficha</a>
+        {% if adminOwnerDirectWhatsapp %}
+          <a class="context-action context-action-whatsapp" target="_blank" rel="noopener" href="{{ adminOwnerDirectWhatsapp }}">WhatsApp</a>
+        {% endif %}
+        <a class="context-clear" href="?owner=all">Ver global</a>
+      </div>
+      {% endif %}
+    </div>
+    {% block content %}
+{% endblock %}
+  </main>
+</div>
+{% endblock %}

@@ -1,0 +1,4 @@
+{% extends 'layouts/admin.njk' %}{% block content %}
+<div class="page-head"><div><span class="eyebrow">CONTACTOS</span><h1>Solicitudes de alta</h1><p class="muted">Personas que completaron el formulario público de QPROPIEDADES durante esta ejecución demo.</p></div></div>
+<section class="panel"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Nombre</th><th>Contacto</th><th>Propiedades</th><th>Mensaje</th></tr></thead><tbody>{% for lead in leads %}<tr><td>{{ lead.createdAt }}</td><td><strong>{{ lead.name }}</strong></td><td>{{ lead.email }}<br>{{ lead.phone }}</td><td>{{ lead.propertiesCount }}</td><td>{{ lead.message }}</td></tr>{% else %}<tr><td colspan="5" class="muted">Todavía no hay solicitudes de alta.</td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

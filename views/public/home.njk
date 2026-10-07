@@ -1,0 +1,206 @@
+{% extends 'layouts/base.njk' %}
+{% block body %}
+<link rel="stylesheet" href="/css/qpropiedades-front.css?v=51">
+
+<div class="qp-page">
+  <header class="qp-nav">
+    <a class="qp-brand" href="/" aria-label="QPROPIEDADES">
+      <span class="qp-brand-mark">Q</span>
+      <span class="qp-brand-name">QPROPIEDADES</span>
+      <small>GESTIÓN INTELIGENTE<br>DE PROPIEDADES</small>
+    </a>
+
+    <button class="qp-mobile-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" data-qp-mobile-toggle><span></span><span></span><span></span></button>
+    <nav class="qp-menu" data-qp-mobile-nav aria-label="Navegación principal">
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#propietarios">Para propietarios</a>
+      <a href="#servicios">Servicios</a>
+      <a href="/ingresar" class="qp-login">Ingresar</a>
+    </nav>
+  </header>
+  <div class="qp-mobile-backdrop" data-qp-mobile-backdrop></div>
+
+  <main>
+    <section class="qp-hero">
+      <div class="qp-hero-copy">
+        <span class="qp-kicker">GESTIÓN INTEGRAL DE PROPIEDADES</span>
+        <h1>Tu propiedad,<br><em>bajo control.</em></h1>
+
+        <p class="qp-lead">
+          Alquileres, vencimientos, documentos, inquilinos,
+          reparaciones e historial. Toda la información de tu propiedad,
+          en un solo lugar.
+        </p>
+
+        <div class="qp-actions">
+          <a href="/alta" class="qp-btn qp-btn-primary">Gestionar mis propiedades</a>
+          <a href="#como-funciona" class="qp-btn qp-btn-outline">Ver cómo funciona →</a>
+        </div>
+
+        <div class="qp-tenant-links">
+          <span>¿Sos inquilino?</span>
+          <button type="button" class="qp-text-link" data-open-qr-reader>Escanear QR</button>
+          <span class="qp-dot">·</span>
+          <a class="qp-text-link" href="/seguimiento">Ver mi reclamo</a>
+        </div>
+      </div>
+
+      <div class="qp-hero-visual qp-hero-ecosystem" aria-label="Ecosistema digital de la propiedad">
+        <div class="qp-property-core">
+          <img src="/img/landing/qpropiedades-house.svg" alt="Propiedad gestionada con QPROPIEDADES">
+        </div>
+
+        <article class="qp-orbit-card qp-card-docs">
+          <span>▤</span>
+          <div><b>Documentos</b><small>Contratos e impuestos</small></div>
+        </article>
+
+        <article class="qp-orbit-card qp-card-rent">
+          <span>$</span>
+          <div><b>Alquileres</b><small>Cobros y vencimientos</small></div>
+        </article>
+
+        <article class="qp-orbit-card qp-card-tenant">
+          <span>●</span>
+          <div><b>Inquilinos</b><small>Información y contacto</small></div>
+        </article>
+
+        <article class="qp-orbit-card qp-card-dates">
+          <span>□</span>
+          <div><b>Vencimientos</b><small>Recordatorios a tiempo</small></div>
+        </article>
+
+        <article class="qp-orbit-card qp-card-repairs">
+          <span>🔧</span>
+          <div><b>Reparaciones</b><small>Reclamos y mantenimiento</small></div>
+        </article>
+
+        <article class="qp-orbit-card qp-card-history">
+          <span>▥</span>
+          <div><b>Historial</b><small>Todo el registro de tu propiedad</small></div>
+        </article>
+
+        <div class="qp-orbit-qr">
+          <img src="/img/landing/qr-demo.png" alt="QR de demostración">
+          <small>Tu propiedad<br>en un QR</small>
+        </div>
+
+        <svg class="qp-orbit-lines" viewBox="0 0 760 500" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M165 90 H290 Q305 90 305 110 V165"/>
+          <path d="M596 90 H482 Q465 90 465 110 V165"/>
+          <path d="M160 250 H260 Q280 250 280 235"/>
+          <path d="M600 250 H500 Q480 250 480 235"/>
+          <path d="M180 410 H300 Q315 410 315 355"/>
+          <path d="M580 410 H470 Q455 410 455 355"/>
+          <path d="M380 390 V330"/>
+        </svg>
+      </div>
+    </section>
+
+    <section class="qp-control-showcase" id="servicios">
+      <div class="qp-control-left">
+        <span class="qp-kicker">TU PROPIEDAD, SIEMPRE A LA VISTA</span>
+        <h2>Gestión simple,<br>resultados reales.</h2>
+        <p>Toda la información de tus propiedades en un solo lugar, accesible desde cualquier dispositivo.</p>
+
+        <div class="qp-control-stats">
+          <div><b>12</b><span>Propiedades</span></div>
+          <div><b>11</b><span>Alquiladas</span></div>
+          <div><b>2</b><span>Alertas</span></div>
+        </div>
+
+        <a href="/alta" class="qp-control-cta">Quiero usar QPROPIEDADES <span>→</span></a>
+
+        <div class="qp-control-benefits">
+          <span>▣ En todos tus dispositivos</span>
+          <span>◇ Seguro</span>
+          <span>◷ Simple</span>
+        </div>
+
+        <div class="qp-laptop" aria-label="Vista del panel QPROPIEDADES">
+          <div class="qp-laptop-screen">
+            <aside>
+              <b>Q</b>
+              <small>⌂ Inicio</small>
+              <small>▦ Propiedades</small>
+              <small>◎ Inquilinos</small>
+              <small>▤ Documentos</small>
+              <small>□ Vencimientos</small>
+              <small>⌕ Reparaciones</small>
+              <small>◌ Alertas</small>
+            </aside>
+            <div class="qp-laptop-content">
+              <div class="qp-laptop-title">Mis propiedades <strong>+ Nueva</strong></div>
+              <article><i></i><div><b>Apto. 101</b><small>Pocitos, Montevideo</small><em>● Alquilada</em></div></article>
+              <article><i></i><div><b>Casa 2</b><small>Carrasco, Montevideo</small><em>● Alquilada</em></div></article>
+              <article><i></i><div><b>Local</b><small>Centro, Montevideo</small><em class="available">● Disponible</em></div></article>
+            </div>
+          </div>
+          <div class="qp-laptop-base"></div>
+        </div>
+      </div>
+
+      <div class="qp-control-right" id="como-funciona">
+        <span class="qp-kicker">TODO BAJO CONTROL</span>
+        <h2>Todo lo que necesitás,<br>en un solo lugar.</h2>
+        <p>Organizá, controlá y resolvé la gestión de tus propiedades de forma rápida y segura.</p>
+
+        <div class="qp-control-grid">
+          <article><span>⌂</span><div><b>Alquileres</b><small>Cobros y vencimientos.</small></div><i>→</i></article>
+          <article><span>▤</span><div><b>Documentos</b><small>Contratos e impuestos.</small></div><i>→</i></article>
+          <article><span>●</span><div><b>Inquilinos</b><small>Información y contacto.</small></div><i>→</i></article>
+          <article><span>▦</span><div><b>Vencimientos</b><small>Recordatorios a tiempo.</small></div><i>→</i></article>
+          <article><span>⌕</span><div><b>Reparaciones</b><small>Reclamos y mantenimiento.</small></div><i>→</i></article>
+          <article><span>▥</span><div><b>Historial</b><small>Todo el registro de tu propiedad.</small></div><i>→</i></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="qp-footer qp-footer-light">
+    <div class="qp-footer-brand">
+      <span class="qp-brand-mark">Q</span>
+      <div><b>QPROPIEDADES</b><small>Gestión inteligente de propiedades.</small></div>
+    </div>
+
+    <div class="qp-footer-links">
+      <a href="{{ links.estudioqr }}"><strong>Estudio QR</strong></a>
+    </div>
+
+    <div class="qp-footer-meta">
+      <span>Montevideo, Uruguay</span>
+      <span>© 2026 QPROPIEDADES</span>
+    </div>
+  </footer>
+
+  <div class="qr-reader-modal" data-qr-reader-modal hidden>
+    <div class="qr-reader-backdrop" data-close-qr-reader></div>
+    <section class="qr-reader-card" role="dialog" aria-modal="true" aria-labelledby="qr-reader-title">
+      <button type="button" class="qr-reader-close" data-close-qr-reader aria-label="Cerrar">×</button>
+      <span class="qp-kicker">QR DE LA PROPIEDAD</span>
+      <h2 id="qr-reader-title">Escanear QR</h2>
+      <p>Apuntá la cámara al QR de la propiedad.</p>
+
+      <div class="qr-reader-camera">
+        <video data-qr-video playsinline muted></video>
+        <div class="qr-reader-frame"></div>
+      </div>
+
+      <p class="qr-reader-status" data-qr-status>Presioná “Activar cámara” para comenzar.</p>
+
+      <button type="button" class="qp-btn qp-btn-primary qr-reader-start" data-start-qr>
+        Activar cámara
+      </button>
+
+      <div class="qr-reader-manual">
+        <span>También podés ingresar el código:</span>
+        <div>
+          <input type="text" data-qr-code placeholder="Ej: QC-0001" autocomplete="off">
+          <button type="button" class="qp-btn qp-btn-dark" data-go-qr>Ir</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<script src="/js/qpropiedades-mobile-nav.js?v=51" defer></script>
+{% endblock %}

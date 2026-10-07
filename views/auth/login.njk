@@ -1,0 +1,40 @@
+{% extends 'layouts/base.njk' %}
+{% block body %}
+<div class="auth-shell">
+  <div class="auth-card">
+    <a href="/qpropiedades" class="brand brand-dark">
+      <span class="brand-mark">Q</span>
+      <span>QPROPIEDADES</span>
+    </a>
+
+    <h1>Ingresar</h1>
+    <p class="muted">Acceso para administrador y propietarios.</p>
+
+    {% if error %}
+      <div class="note note-danger">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="/ingresar" class="stack-form">
+      <label>
+        Email
+        <input type="email" name="email" required>
+      </label>
+      <label>
+        Contraseña
+        <input type="password" name="password" required>
+      </label>
+      <button class="btn btn-primary">Ingresar</button>
+    </form>
+
+    <div class="demo-box">
+      <strong>Usuarios demo</strong>
+      {% for user in demoUsers %}
+        <p>
+          {{ user.label }}{% if user.name %} · {{ user.name }}{% endif %}:<br>
+          <code>{{ user.email }}</code> / <code>{{ user.password }}</code>
+        </p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

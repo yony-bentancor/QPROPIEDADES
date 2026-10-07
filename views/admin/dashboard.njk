@@ -1,0 +1,129 @@
+{% extends 'layouts/admin.njk' %}
+{% block content %}
+<style>@import url('/css/admin-dashboard.css');</style>
+<style>@import url('/css/admin-dashboard-rent.css');</style>
+
+<div class="admin-dashboard-v2">
+  <header class="ad2-head">
+    <div>
+      <span class="eyebrow">ADMINISTRADOR</span>
+      <h1>Centro de control</h1>
+      <p>{% if selectedOwner %}Información completa de {{ selectedOwner.name }}.{% else %}Lo que necesita atención hoy en toda la cartera.{% endif %}</p>
+    </div>
+    <div class="ad2-head-actions">
+      {% if selectedOwner %}
+        <a href="/admin/propietarios/{{ selectedOwner.id }}" class="btn btn-light">Ver ficha</a>
+        {% if ownerWhatsappUrl %}<a href="{{ ownerWhatsappUrl }}" target="_blank" rel="noopener" class="btn btn-light">WhatsApp</a>{% endif %}
+      {% endif %}
+      <a href="/admin/propiedades/nueva" class="btn btn-primary">+ Nueva propiedad</a>
+    </div>
+  </header>
+
+  {% include 'partials/flash-note.njk' %}
+
+  <section class="ad2-kpis">
+    <a href="/admin/propiedades" class="ad2-kpi">
+      <span>PROPIEDADES</span><strong>{{ stats.properties }}</strong>
+      <small>{{ stats.rentedProperties }} alquiladas · {{ stats.vacantProperties }} vacías</small>
+    </a>
+    <a href="/admin/propietarios" class="ad2-kpi">
+      <span>PROPIETARIOS</span><strong>{{ stats.owners }}</strong>
+      <small>{% if selectedOwner %}contexto activo{% else %}en la cartera{% endif %}</small>
+    </a>
+    <a href="/admin/reclamos" class="ad2-kpi {% if stats.openClaims %}has-warning{% endif %}">
+      <span>RECLAMOS ABIERTOS</span><strong>{{ stats.openClaims }}</strong><small>requieren seguimiento</small>
+    </a>
+    <a href="/admin/vencimientos" class="ad2-kpi {% if stats.nextSevenDays %}has-warning{% endif %}">
+      <span>VENCIMIENTOS CRÍTICOS</span><strong>{{ stats.nextSevenDays }}</strong><small>próximos 7 días</small>
+    </a>
+  </section>
+
+  <section class="ad2-panel rent-control">
+    <div class="ad2-panel-head">
+      <div>
+        <span class="eyebrow">ALQUILERES · {{ rentalControl.periodLabel | upper }}</span>
+        <h2>Control de cobros del mes</h2>
+        <p>{{ rentalControl.paidCount }} de {{ rentalControl.expectedCount }} alquileres cobrados.</p>
+      </div>
+      <a href="/admin/cobros">Ir a Cobros →</a>
+    </div>
+
+    <div class="rent-summary">
+      <div><span>ALQUILERES ESPERADOS</span><strong>{{ rentalControl.expectedCount }}</strong><small>{{ money(rentalControl.expectedAmount,'UYU') }}</small></div>
+      <div class="is-ok"><span>COBRADOS</span><strong>{{ rentalControl.paidCount }}</strong><small>registrados como pagados</small></div>
+      <div class="{% if rentalControl.missingCount %}is-danger{% endif %}"><span>FALTAN COBRAR</span><strong>{{ rentalControl.missingCount }}</strong><small>{{ money(rentalControl.missingAmount,'UYU') }}</small></div>
+    </div>
+
+    {% if rentalControl.missingRents.length %}
+    <div class="rent-list">
+      <div class="rent-list-head"><span>Propiedad / inquilino</span><span>Propietario</span><span>Vence</span><span>Importe</span><span></span></div>
+      {% for item in rentalControl.missingRents %}
+      <article class="rent-row">
+        <div>
+          <a href="/admin/propiedades/{{ item.property.code }}"><strong>{{ item.property.code }} · {{ item.property.address }}</strong></a>
+          <span>Inquilino: {{ item.tenantName }}</span>
+        </div>
+        <div><strong>{{ item.ownerName }}</strong></div>
+        <time>{{ item.dueDateLabel }}</time>
+        <strong>{{ money(item.amount,item.currency) }}</strong>
+        <div class="rent-actions">
+          {% if item.whatsappUrl %}<a href="{{ item.whatsappUrl }}" target="_blank" rel="noopener" class="rent-whatsapp">Avisar por WhatsApp</a>{% endif %}
+          <a href="/admin/cobros">Ver cobro</a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="rent-all-paid">
+      <strong>✓ Todos los alquileres del mes están cobrados.</strong>
+      <span>No hay inquilinos pendientes en este contexto.</span>
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="ad2-panel ad2-deadlines">
+    <div class="ad2-panel-head"><div><span class="eyebrow">AGENDA</span><h2>Próximos vencimientos</h2><p>{{ stats.pendingDeadlines }} pendientes, separados por trámite y ordenados por fecha.</p></div><a href="/admin/vencimientos">Ver todos →</a></div>
+    {% if deadlineGroups.length %}
+    <div class="ad2-deadline-groups">
+      {% for group in deadlineGroups %}
+      <article class="ad2-deadline-group">
+        <header><div><span>TRÁMITE</span><h3>{{ group.label }}</h3></div><b>{{ group.count }}</b></header>
+        <div class="ad2-deadline-list">
+          {% for a in group.items %}
+          <a href="/admin/propiedades/{{ a.propertyCode }}" class="ad2-deadline-row">
+            <time><strong>{{ a.dateShort }}</strong><small>{{ a.statusText }}</small></time>
+            <div class="ad2-deadline-main"><strong>{{ a.title }}</strong><span>{{ a.propertyCode }} · {{ a.property.address if a.property else 'Propiedad' }}</span><small>{{ a.ownerName }}</small></div>
+            {% if a.amount %}<b>{{ money(a.amount, a.currency) }}</b>{% endif %}
+            <i class="ad2-dot ad2-dot-{{ a.level }}"></i>
+          </a>
+          {% endfor %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="ad2-empty"><strong>Sin vencimientos pendientes.</strong><span>No hay trámites futuros para mostrar con este contexto.</span></div>
+    {% endif %}
+  </section>
+
+  <div class="ad2-columns">
+    <section class="ad2-panel">
+      <div class="ad2-panel-head"><div><span class="eyebrow">PRIORIDAD</span><h2>Requiere atención</h2></div></div>
+      <div class="ad2-attention-list">
+        {% for item in attention %}
+        <a href="/admin/propiedades/{{ item.propertyCode }}" class="ad2-attention-row"><i class="ad2-dot ad2-dot-{{ item.level }}"></i><div><strong>{{ item.title }}</strong><span>{{ item.propertyCode }} · {{ item.property.address if item.property else '' }}</span><small>{{ item.ownerName }} · {{ item.detail }}</small></div></a>
+        {% else %}<div class="ad2-empty"><strong>Sin urgencias.</strong><span>No hay reclamos abiertos.</span></div>{% endfor %}
+      </div>
+    </section>
+
+    <section class="ad2-panel">
+      <div class="ad2-panel-head"><div><span class="eyebrow">MANTENIMIENTO</span><h2>Reclamos abiertos</h2></div><a href="/admin/reclamos">Ver todos →</a></div>
+      <div class="ad2-simple-list">
+        {% for c in latestClaims %}
+        <a href="/admin/reclamos/{{ c.number }}"><div><strong>#{{ c.number }} · {{ c.title }}</strong><span>{{ c.propertyCode }} · {{ c.property.address if c.property else '' }}</span><small>{{ c.ownerName }}</small></div><b>{{ c.status }}</b></a>
+        {% else %}<div class="ad2-empty"><strong>Sin reclamos abiertos.</strong></div>{% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

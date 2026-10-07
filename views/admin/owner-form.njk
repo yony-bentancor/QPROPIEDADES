@@ -1,0 +1,19 @@
+{% extends 'layouts/admin.njk' %}
+{% block content %}
+<style>@import url('/css/admin-owners.css');</style>
+<div class="owners-page owner-form-page">
+  <header class="owners-head"><div><span class="eyebrow">PROPIETARIO</span><h1>{% if mode == 'create' %}Nuevo propietario{% else %}Editar propietario{% endif %}</h1><p>Los cambios de contacto se reflejan en todas sus propiedades asociadas.</p></div></header>
+  <form method="post" action="{% if mode == 'create' %}/admin/propietarios/nuevo{% else %}/admin/propietarios/{{ owner.id }}/editar{% endif %}" class="owner-form-card">
+    <div class="owner-form-grid">
+      <label>Nombre completo<input name="name" value="{{ owner.name }}" required></label>
+      <label>Documento / RUT<input name="document" value="{{ owner.document }}"></label>
+      <label>Teléfono / WhatsApp<input name="phone" value="{{ owner.phone }}" placeholder="59899123456"></label>
+      <label>Email<input type="email" name="email" value="{{ owner.email }}"></label>
+      <label class="full">Dirección<input name="address" value="{{ owner.address }}"></label>
+      <label class="full">Notas<textarea name="notes" rows="4">{{ owner.notes }}</textarea></label>
+      <label>Estado<select name="active"><option value="true" {% if owner.active != false %}selected{% endif %}>Activo</option><option value="false" {% if owner.active == false %}selected{% endif %}>Inactivo</option></select></label>
+    </div>
+    <div class="form-actions"><a class="btn btn-light" href="{% if mode == 'edit' %}/admin/propietarios/{{ owner.id }}{% else %}/admin/propietarios{% endif %}">Cancelar</a><button class="btn btn-primary">Guardar propietario</button></div>
+  </form>
+</div>
+{% endblock %}

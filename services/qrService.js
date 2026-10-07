@@ -1,0 +1,1 @@
+const QRCode=require('qrcode');async function propertyQrDataUrl(baseUrl,code){return QRCode.toDataURL(`${baseUrl}/r/${encodeURIComponent(code)}`,{margin:1,width:420})}module.exports={propertyQrDataUrl};

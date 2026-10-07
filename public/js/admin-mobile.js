@@ -1,0 +1,1 @@
+(()=>{const sidebar=document.querySelector('.sidebar'),button=document.querySelector('[data-admin-menu]');if(!sidebar||!button)return;button.addEventListener('click',()=>{const open=sidebar.classList.toggle('is-open');button.setAttribute('aria-expanded',String(open));button.setAttribute('aria-label',open?'Cerrar menú':'Abrir menú');button.textContent=open?'×':'☰';});})();

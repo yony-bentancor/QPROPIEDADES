@@ -1,0 +1,1 @@
+const mongoose=require('mongoose');const S=new mongoose.Schema({propertyCode:{type:String,index:true},period:String,concept:String,dueDate:Date,amount:Number,currency:String,status:String,paidAt:Date,method:String,reference:String,notes:String},{timestamps:true});module.exports=mongoose.model('Payment',S);

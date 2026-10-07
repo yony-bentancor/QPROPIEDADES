@@ -1,0 +1,44 @@
+QCASA · Dashboard Administrador V2
+
+OBJETIVO
+Convertir /admin en un centro de control operativo preparado para trabajar
+con varios propietarios, sin modificar todavía las demás secciones.
+
+ARCHIVOS
+- controllers/adminDashboardController.js   (nuevo)
+- routes/admin.js                           (reemplazar)
+- views/admin/dashboard.njk                 (reemplazar)
+- public/css/admin-dashboard.css            (nuevo)
+
+QUÉ CAMBIA
+- Selector por propietario.
+- Propietarios se obtienen de owner ya guardado dentro de cada propiedad.
+- KPIs más útiles: propiedades, propietarios, reclamos abiertos y vencimientos críticos.
+- Vencimientos separados en:
+  Contribución / Primaria / Contratos / Seguros / Alquileres / Impuestos / Otros.
+- Cada grupo queda ordenado por fecha.
+- Cada vencimiento muestra propiedad + propietario.
+- Reclamos: solo abiertos en el dashboard.
+- Cobros pendientes con los vencidos primero.
+- No toca las pantallas de Propiedades, Reclamos, Técnicos, Cobros, Vencimientos,
+  Documentos ni Configuración.
+
+INSTALACIÓN
+Copiar las carpetas sobre la raíz del proyecto y reemplazar routes/admin.js
+y views/admin/dashboard.njk cuando Windows pregunte.
+
+Luego:
+npm run dev
+
+Probar:
+http://localhost:3000/admin
+
+Git:
+git add -A
+git commit -m "Rediseña dashboard admin por propietario y vencimientos"
+git push origin main
+
+NOTA DE ARQUITECTURA
+Por ahora los propietarios se agrupan usando property.owner.email (o nombre como respaldo),
+porque así está estructurado el proyecto actual. Más adelante, al pasar a MongoDB,
+conviene crear un modelo Owner/User independiente y referenciarlo desde Property.

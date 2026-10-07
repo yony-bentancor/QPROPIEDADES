@@ -1,0 +1,29 @@
+{% extends 'layouts/base.njk' %}
+{% block body %}
+<link rel="stylesheet" href="/css/owner-portal.css">
+
+<div class="owner-shell">
+  <header class="owner-topbar">
+    <a href="/propietario" class="owner-brand" aria-label="QPROPIEDADES propietario">
+      <span class="owner-brand-mark">Q</span>
+      <span>QPROPIEDADES</span>
+    </a>
+
+    <div class="owner-topbar-user">
+      <div>
+        <span>PROPIETARIO</span>
+        <strong>{{ session.user.name }}</strong>
+      </div>
+      <form method="post" action="/salir">
+        <button class="owner-logout" type="submit">Salir</button>
+      </form>
+    </div>
+  </header>
+
+  <main class="owner-main">
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+<script src="/js/owner-portal.js" defer></script>
+{% endblock %}

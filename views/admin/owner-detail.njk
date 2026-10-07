@@ -1,0 +1,49 @@
+{% extends 'layouts/admin.njk' %}
+{% block content %}
+<style>@import url('/css/admin-owners.css');</style>
+<div class="owners-page">
+  <header class="owner-detail-head">
+    <div>
+      <span class="eyebrow">FICHA DEL PROPIETARIO</span>
+      <h1>{{ owner.name }}</h1>
+      <p>{{ owner.document or 'Sin documento' }} · {{ owner.email or 'Sin email' }} · {{ owner.phone or 'Sin teléfono' }}</p>
+    </div>
+    <div class="owner-detail-actions">
+      {% if simpleWhatsappUrl %}<a class="btn btn-light" target="_blank" rel="noopener" href="{{ simpleWhatsappUrl }}">Mensaje WhatsApp</a>{% endif %}
+      {% if whatsappUrl %}<a class="btn btn-primary" target="_blank" rel="noopener" href="{{ whatsappUrl }}">Enviar resumen</a>{% endif %}
+      <a class="btn btn-light" href="/admin/propietarios/{{ owner.id }}/editar">Editar</a>
+    </div>
+  </header>
+
+  <section class="owner-detail-stats">
+    <article><span>PROPIEDADES</span><strong>{{ stats.properties }}</strong><small>{{ stats.rented }} alquiladas · {{ stats.vacant }} no alquiladas</small></article>
+    <article><span>ALQUILER MENSUAL</span><strong>{{ money(stats.totalMonthlyRent,'UYU') }}</strong><small>previsto</small></article>
+    <article><span>COBROS PENDIENTES</span><strong>{{ stats.pendingPayments }}</strong><small>{{ money(stats.pendingAmount,'UYU') }}</small></article>
+    <article><span>RECLAMOS ABIERTOS</span><strong>{{ stats.openClaims }}</strong><small>{{ stats.pendingAlerts }} vencimientos pendientes</small></article>
+  </section>
+
+  <section class="owner-panel">
+    <div class="owner-panel-head"><div><span class="eyebrow">PATRIMONIO</span><h2>Propiedades</h2></div><a href="/admin?owner={{ owner.id }}">Trabajar con este propietario →</a></div>
+    <div class="owner-property-list">
+      {% for p in properties %}
+      <a href="/admin/propiedades/{{ p.code }}"><div><strong>{{ p.code }} · {{ p.address }}</strong><span>{{ p.unit }}{% if p.tenant and p.tenant.name %} · {{ p.tenant.name }}{% endif %}</span></div><b>{{ p.status }}</b></a>
+      {% else %}<div class="owner-empty"><strong>Sin propiedades asociadas.</strong></div>{% endfor %}
+    </div>
+  </section>
+
+  <div class="owner-detail-columns">
+    <section class="owner-panel">
+      <div class="owner-panel-head"><div><span class="eyebrow">MANTENIMIENTO</span><h2>Reclamos abiertos</h2></div></div>
+      <div class="owner-mini-list">{% for c in complaints %}<a href="/admin/reclamos/{{ c.number }}"><strong>#{{ c.number }} · {{ c.title }}</strong><span>{{ c.propertyCode }} · {{ c.status }}</span></a>{% else %}<div class="owner-empty">Sin reclamos abiertos.</div>{% endfor %}</div>
+    </section>
+    <section class="owner-panel">
+      <div class="owner-panel-head"><div><span class="eyebrow">AGENDA</span><h2>Vencimientos</h2></div></div>
+      <div class="owner-mini-list">{% for a in alertsPreview %}<a href="/admin/propiedades/{{ a.propertyCode }}"><strong>{{ a.title }}</strong><span>{{ a.propertyCode }} · {{ a.dueDate }}</span></a>{% else %}<div class="owner-empty">Sin vencimientos pendientes.</div>{% endfor %}</div>
+    </section>
+  </div>
+
+  {% if stats.properties == 0 %}
+  <form method="post" action="/admin/propietarios/{{ owner.id }}/eliminar" onsubmit="return confirm('¿Eliminar este propietario?')"><button class="owner-delete">Eliminar propietario</button></form>
+  {% endif %}
+</div>
+{% endblock %}

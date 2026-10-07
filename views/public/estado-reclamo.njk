@@ -1,0 +1,61 @@
+{% extends 'layouts/base.njk' %}
+{% block body %}
+<link rel="stylesheet" href="/css/qpropiedades-front.css?v=51">
+<div class="qp-page qp-inner-page">
+  <header class="qp-nav">
+    <a class="qp-brand" href="/">
+      <span class="qp-brand-mark">Q</span>
+      <span class="qp-brand-name">QPROPIEDADES</span>
+    </a>
+    <button class="qp-mobile-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" data-qp-mobile-toggle><span></span><span></span><span></span></button>
+    <nav class="qp-menu" data-qp-mobile-nav>
+      <a href="/">Inicio</a>
+      <a href="/seguimiento">Consultar otro reclamo</a>
+    </nav>
+  </header>
+  <div class="qp-mobile-backdrop" data-qp-mobile-backdrop></div>
+
+  <main class="qp-status-shell">
+    <section class="qp-status-card">
+      <div class="qp-status-top">
+        <div>
+          <span class="qp-kicker">RECLAMO #{{ complaint.number }}</span>
+          <h1>{{ complaint.title }}</h1>
+          <p>{{ property.address if property else complaint.propertyCode }}</p>
+        </div>
+        <span class="qp-status-pill">{{ complaint.status }}</span>
+      </div>
+
+      <div class="qp-status-grid">
+        <div><small>Estado actual</small><b>{{ complaint.status }}</b></div>
+        <div><small>Categoría</small><b>{{ complaint.category }}</b></div>
+        <div><small>Técnico</small><b>{{ complaint.technicianName or 'Aún no asignado' }}</b></div>
+        <div><small>Última actualización</small><b>{{ complaint.updatedAt | replace('T',' ') | truncate(16, true, '') }}</b></div>
+      </div>
+
+      {% if complaint.description %}
+      <div class="qp-status-description">
+        <small>Descripción</small>
+        <p>{{ complaint.description }}</p>
+      </div>
+      {% endif %}
+
+      <div class="qp-timeline">
+        <h2>Historial</h2>
+        {% for item in complaint.history %}
+        <article>
+          <span></span>
+          <div>
+            <b>{{ item.status }}</b>
+            <p>{{ item.note }}</p>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+
+      <a href="/seguimiento" class="qp-btn qp-btn-outline">Volver</a>
+    </section>
+  </main>
+</div>
+<script src="/js/qpropiedades-mobile-nav.js?v=51" defer></script>
+{% endblock %}

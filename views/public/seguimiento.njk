@@ -1,0 +1,44 @@
+{% extends 'layouts/base.njk' %}
+{% block body %}
+<link rel="stylesheet" href="/css/qpropiedades-front.css?v=51">
+<div class="qp-page qp-inner-page">
+  <header class="qp-nav">
+    <a class="qp-brand" href="/">
+      <span class="qp-brand-mark">Q</span>
+      <span class="qp-brand-name">QPROPIEDADES</span>
+    </a>
+    <button class="qp-mobile-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" data-qp-mobile-toggle><span></span><span></span><span></span></button>
+    <nav class="qp-menu" data-qp-mobile-nav>
+      <a href="/">Inicio</a>
+      <a href="/alta">Para propietarios</a>
+      <a href="/ingresar" class="qp-login">Ingresar</a>
+    </nav>
+  </header>
+  <div class="qp-mobile-backdrop" data-qp-mobile-backdrop></div>
+
+  <main class="qp-form-shell qp-track-shell">
+    <section class="qp-form-intro">
+      <span class="qp-kicker">SEGUIMIENTO</span>
+      <h1>Ver mi reclamo.</h1>
+      <p>Ingresá el número que recibiste al reportar y tu teléfono.</p>
+      <a href="/" class="qp-back">← Volver al inicio</a>
+    </section>
+
+    <section class="qp-form-card">
+      {% if error %}
+        <div class="qp-error-box">{{ error }}</div>
+      {% endif %}
+      <form method="post" action="/seguimiento">
+        <label>Número de reclamo
+          <input type="text" name="number" placeholder="Ej: 304" required inputmode="numeric">
+        </label>
+        <label>Teléfono
+          <input type="tel" name="phone" required autocomplete="tel">
+        </label>
+        <button class="qp-btn qp-btn-primary qp-btn-full" type="submit">Consultar estado</button>
+      </form>
+    </section>
+  </main>
+</div>
+<script src="/js/qpropiedades-mobile-nav.js?v=51" defer></script>
+{% endblock %}
