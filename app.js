@@ -20,7 +20,7 @@ const PORT=process.env.PORT||3001;
 const DEV_SECRET='qpropiedades-dev-secret';
 app.locals.demoMode=String(process.env.DEMO_MODE||'true').toLowerCase()!=='false';
 app.locals.links={
-  estudioqr:process.env.ESTUDIOQR_URL||'http://localhost:3000'
+  estudioqr:process.env.ESTUDIOQR_URL||'https://estudioqr-7fd22333fa47.herokuapp.com/'
 };
 
 app.set('trust proxy',1);
