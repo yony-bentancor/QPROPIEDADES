@@ -13,7 +13,7 @@ Separado del repo unificado `INMOBILIARIA`. Funciona solo, con sus propios archi
 - Panel de administración (`/admin`): dashboard, propiedades, propietarios, altas, reclamos, técnicos, vencimientos, cobros, documentos y configuración (con calculadora de sueldo).
 - Portal del propietario (`/propietario`).
 - Mensajes de WhatsApp armados, generación de QR por propiedad.
-- Modelos MongoDB preparados (los datos siguen en modo demo, en memoria).
+- Datos guardados en MongoDB Atlas con `USE_MONGO=true` (ver «Base de datos»). Sin eso, modo demo en memoria.
 
 ## Ejecutar
 
@@ -66,3 +66,15 @@ public/        css, js, img (demo, landing)
 scripts/       seedMongo.js
 docs/historial notas de etapas anteriores
 ```
+
+
+## Base de datos (MongoDB Atlas)
+
+Con `USE_MONGO=true` y `MONGO_URI`, la app carga todos los datos desde MongoDB al arrancar y guarda cada cambio (alta, edición o baja) al terminar el pedido, más un guardado de seguridad cada 30 segundos y al apagarse.
+
+- **Primera vez:** si la base nunca se usó, se guardan los datos de muestra como punto de partida (queda registrado en la colección `_meta`). No se vuelve a sembrar aunque después borres todo.
+- **Colecciones:** `propiedades`, `propietarios`, `tecnicos`, `reclamos`, `vencimientos`, `cobros`, `documentos`, `auditoria`, `solicitudes`. El campo `_orden` conserva el orden de las listas.
+- **Seguridad:** si no puede leer la base al arrancar, la app no inicia (para no mostrar datos de muestra ni pisar los reales).
+- Los archivos subidos (`uploads/`) todavía se guardan en el servidor y en Heroku se pierden al reiniciar.
+
+En Heroku: `heroku config:set USE_MONGO=true MONGO_URI="mongodb+srv://qpropiedades_user:CLAVE@.../qpropiedades?retryWrites=true&w=majority"`

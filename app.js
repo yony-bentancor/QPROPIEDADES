@@ -7,6 +7,7 @@ const nunjucks=require('nunjucks');
 const{exposeSession}=require('./middleware/auth');
 const{money,alertLevel,alertText}=require('./utils/helpers');
 const{connectDatabase}=require('./config/database');
+const{crearPersistencia}=require('./data/persistencia');
 const{helmetMiddleware}=require('./middleware/commercialSecurity');
 
 /*
@@ -55,6 +56,10 @@ app.locals.money=money;
 app.locals.alertLevel=alertLevel;
 app.locals.alertText=alertText;
 
+// Con USE_MONGO=true, cada cambio se guarda en MongoDB al terminar el pedido.
+let persistencia=null;
+app.use((req,res,next)=>persistencia?persistencia.middleware(req,res,next):next());
+
 app.use('/',require('./routes/public'));
 app.use('/',require('./routes/auth'));
 app.use('/admin',require('./routes/admin'));
@@ -70,7 +75,15 @@ async function start(){
   try{
     if(process.env.NODE_ENV==='production'&&(!process.env.SESSION_SECRET||process.env.SESSION_SECRET===DEV_SECRET)) throw new Error('SESSION_SECRET es obligatorio y debe ser propio en producción.');
     const db=await connectDatabase();
-    if(db.connected) console.log('MongoDB conectado (los repositorios siguen en modo demo en esta etapa).');
+    if(db.connected){
+      // Los datos pasan a vivir en MongoDB: se cargan antes de aceptar visitas.
+      const mongoose=require('mongoose');
+      persistencia=crearPersistencia(require('./data/demoStore'),mongoose.connection.db);
+      await persistencia.cargar();
+      setInterval(()=>persistencia.guardar(),30000).unref();
+      process.once('SIGTERM',async()=>{await persistencia.guardar();process.exit(0);});
+      console.log('MongoDB conectado: los datos se guardan en la base.');
+    }
     app.listen(PORT,()=>console.log(`QPROPIEDADES activo en http://localhost:${PORT}`));
   }catch(err){
     console.error('No se pudo iniciar QPROPIEDADES:',err.message);
