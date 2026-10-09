@@ -25,7 +25,7 @@ const REGLAS = {
 };
 
 async function main() {
-  const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
+  const uri = String(process.env.MONGO_URI || '').trim();
   if (!uri) throw new Error('Falta MONGO_URI.');
   const confirmar = process.argv.includes('--confirmar');
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 });
