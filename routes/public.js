@@ -15,5 +15,6 @@ r.get('/r/:code',c.qrLanding);
 r.post('/r/:code/reclamar',upload.array('attachments',6),c.createComplaint);
 r.get('/reclamo-enviado/:number',c.success);
 r.get('/trabajo/:token',c.publicJob);
+r.get('/archivo/*',c.archivo);
 
 module.exports=r;

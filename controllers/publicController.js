@@ -66,17 +66,23 @@ exports.qrLanding=(req,res)=>{
   });
 };
 
-exports.createComplaint=(req,res)=>{
+exports.createComplaint=async(req,res,next)=>{
   const p=store.findProperty(req.params.code);
   if(!p||!p.active)return res.status(404).send('Propiedad no encontrada.');
 
+  // Adjuntos: con R2 configurado van a Cloudflare R2 (privado) y en la base solo queda la clave.
+  // Sin R2 quedan en /uploads como antes (en Heroku se pierden al reiniciar).
+  let attachments;
+  try{
+    attachments=await guardarAdjuntos(req.files||[],`reclamos/${p.code}`);
+  }catch(err){
+    console.error('[adjuntos] no se pudieron guardar:',err.message);
+    return res.status(503).render('public/report.njk',{
+      title:`Reportar problema | ${p.address}`,property:p,categories:CLAIM_CATEGORIES,form:req.body,
+      error:'No pudimos guardar las fotos o videos en este momento. Probá de nuevo en unos minutos; si sigue fallando, enviá el reclamo sin adjuntos.'
+    });
+  }
   const number=store.nextComplaintNumber();
-  const attachments=(req.files||[]).map(f=>({
-    id:uid('att'),
-    kind:f.mimetype.startsWith('video/')?'video':'image',
-    name:f.originalname,
-    url:`/uploads/${f.filename}`
-  }));
 
   const c={
     id:uid('clm'),
@@ -120,4 +126,38 @@ exports.publicJob=(req,res)=>{
     complaint:c,
     property:store.findProperty(c.propertyCode)
   });
+};
+
+const fs=require('fs');
+const r2=require('../services/r2');
+async function guardarAdjuntos(files,carpeta){
+  const kind=f=>f.mimetype.startsWith('video/')?'video':'image';
+  if(!r2.configurado()){
+    return files.map(f=>({id:uid('att'),kind:kind(f),name:f.originalname,url:`/uploads/${f.filename}`}));
+  }
+  const subidos=[];
+  try{
+    for(const f of files){
+      const key=r2.nuevaClave(carpeta,f.originalname);
+      await r2.subir(key,await fs.promises.readFile(f.path),f.mimetype);
+      subidos.push({id:uid('att'),kind:kind(f),name:f.originalname,size:f.size,storage:'r2',key,url:`/archivo/${key}`});
+    }
+    return subidos;
+  }catch(err){
+    // si falla uno, se borran los que ya habían subido para no dejar archivos sueltos
+    await Promise.all(subidos.map(a=>r2.borrar(a.key).catch(()=>{})));
+    throw err;
+  }finally{
+    await Promise.all(files.map(f=>fs.promises.unlink(f.path).catch(()=>{})));
+  }
+}
+exports.guardarAdjuntos=guardarAdjuntos;
+
+// Muestra un archivo de R2 con un link firmado que vence en 10 minutos.
+exports.archivo=(req,res)=>{
+  const key=String(req.params[0]||'');
+  if(!r2.configurado()||!key.startsWith(r2.config().prefix)||key.includes('..'))return res.status(404).send('Archivo no encontrado.');
+  const nombre=key.split('/').pop().replace(/^[0-9a-f]{24}-/,'');
+  res.set('Cache-Control','private, max-age=300');
+  res.redirect(302,r2.linkTemporal(key,{segundos:600,nombre}));
 };

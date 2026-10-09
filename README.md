@@ -78,3 +78,14 @@ Con `USE_MONGO=true` y `MONGO_URI`, la app carga todos los datos desde MongoDB a
 - Los archivos subidos (`uploads/`) todavía se guardan en el servidor y en Heroku se pierden al reiniciar.
 
 En Heroku: `heroku config:set USE_MONGO=true MONGO_URI="mongodb+srv://qpropiedades_user:CLAVE@.../qpropiedades?retryWrites=true&w=majority"`
+
+## Archivos (Cloudflare R2)
+
+Los adjuntos de los reclamos (fotos y videos que sube el inquilino desde el QR) se guardan en **Cloudflare R2** cuando están configuradas las variables `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` y `R2_BUCKET` (opcional `R2_PREFIX`, por defecto `qpropiedades/`).
+
+- En MongoDB solo se guarda la **clave** del archivo (y nombre, tipo y tamaño), nunca el archivo.
+- El bucket es **privado**: los archivos se abren por `/archivo/<clave>`, que redirige a un link firmado que vence a los 10 minutos.
+- Las claves llevan 24 caracteres aleatorios: no se pueden adivinar.
+- Las fotos se achican en el navegador antes de subir (máx. 1920 px, JPEG); los videos se suben tal cual (máx. 25 MB).
+- Si la subida a R2 falla, el reclamo no se crea a medias: se borran los archivos ya subidos y el inquilino ve un aviso para reintentar.
+- Sin R2 configurado, todo funciona como antes con la carpeta `uploads/`.
