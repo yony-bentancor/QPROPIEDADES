@@ -26,6 +26,7 @@
       <button class="btn btn-primary">Ingresar</button>
     </form>
 
+    {% if demoUsers.length %}
     <div class="demo-box">
       <strong>Usuarios demo</strong>
       {% for user in demoUsers %}
@@ -35,6 +36,7 @@
         </p>
       {% endfor %}
     </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
